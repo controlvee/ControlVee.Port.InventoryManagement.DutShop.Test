@@ -17,8 +17,7 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test.Controllers
     public class HomeController : Controller
     {
         private List<BatchModel> batches;
-        private List<BatchModel> expiresNext;
-        private List<InventoryOnHandModel> inv;
+        private List<InventoryOnHandModel> expiresNext;
         private readonly string cstring = @"Data Source=(localdb)\mssqllocaldb;Database=DutShop;Integrated Security=True";
         private DataAccess context;
 
@@ -35,7 +34,7 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test.Controllers
         public IActionResult Index()
         {
             batches = new List<BatchModel>();
-            expiresNext = new List<BatchModel>();
+           
             using (var connection = new System.Data.SqlClient.SqlConnection())
             {
                 connection.ConnectionString = cstring;
@@ -52,7 +51,8 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test.Controllers
             return View();
         }
        
-        
+       
+
         // Change to past any time.
         public IActionResult GetBatchesPastFiveMinutes()
         {
@@ -86,7 +86,7 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test.Controllers
 
         [HttpGet]
         // TODO: Returns two obj from S_Proc.
-        public IActionResult GetMostRecentBatches()
+        public IActionResult GetMostRecentBatchesFromS_Proc()
         {
             batches = new List<BatchModel>();
             using (var connection = new System.Data.SqlClient.SqlConnection())
@@ -99,13 +99,33 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test.Controllers
                 {
                     batches = context.GetJustUpdatedBatchesFromDb();
                 }
-               
+
             };
 
             string json = JsonConvert.SerializeObject(batches);
 
             return Json(json);
         }
+
+        [HttpGet]
+        public IActionResult GetExpiresNext()
+        {
+            expiresNext = new List<InventoryOnHandModel>();
+            using (var connection = new System.Data.SqlClient.SqlConnection())
+            {
+                connection.ConnectionString = cstring;
+
+                context = new DataAccess(connection);
+
+                expiresNext = context.GetExpiresNextByBatchFromDb();
+               
+            };
+
+            string json = JsonConvert.SerializeObject(expiresNext);
+
+            return Json(json);
+        }
+
 
         public IActionResult UpdateBatches()
         {

@@ -102,9 +102,9 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test
             return batches;
         }
 
-        public List<BatchModel> GetExpiresNextByBatchFromDb()
+        public List<InventoryOnHandModel> GetExpiresNextByBatchFromDb()
         {
-            batches = new List<BatchModel>();
+            inv = new List<InventoryOnHandModel>();
 
             // TODO.
             AssuredConnected();
@@ -117,12 +117,12 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test
                 {
                     while (reader.Read())
                     {
-                        batches.Add(MapBatchesFromDb(reader));
+                        inv.Add(MapTotalOnHandInvetoryToDb(reader));
                     }
                 }
             }
 
-            return batches;
+            return inv;
         }
 
         public BatchModel GetBatchesByIdFromDb(int id)
@@ -172,9 +172,13 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test
             // TODO.
             InventoryOnHandModel inv = new InventoryOnHandModel();
 
+            inv = new InventoryOnHandModel();
+            inv.ID = (int)reader["ID"];
             inv.NameOf = (string)reader["nameOf"];
             inv.Total = (int)reader["total"];
+            inv.Completion = (DateTime)reader["completion"];
             inv.Expiration = (DateTime)reader["expire"];
+            inv.BatchId = (int)reader["batchId"];
 
             return inv;
         } 

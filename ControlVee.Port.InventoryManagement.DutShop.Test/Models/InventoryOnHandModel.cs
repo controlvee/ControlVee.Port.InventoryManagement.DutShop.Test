@@ -11,6 +11,7 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test.Models
         public int Total { get; set; }
         public DateTime Completion { get; set; }
         public DateTime Expiration { get; set; }
+        public int BatchId { get; set; }
 
         public InventoryOnHandModel()
         {

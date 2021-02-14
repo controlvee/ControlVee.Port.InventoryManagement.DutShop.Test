@@ -17,6 +17,9 @@
 <body onload="setDefaultValues()">
 
     <div class="container">
+        <button id="getBatchesBtn" class="btn btn-light">@Html.ActionLink("get", "GetBatches")</button>
+        <button id="getBatchesBtn" class="btn btn-light">update</button>
+        <button id="getBatchesBtn" class="btn btn-light">create</button>
         <div class="container">
             <div class="card-header">
                 newest batches:
@@ -42,109 +45,177 @@
                     int a = 0;
                     for (int x = 0; x < 10; x++)
                     {
-                        BatchModel b = new BatchModel();
+                        BatchModel batch = new BatchModel();
 
                         if (x < a)
                         {
                             foreach (BatchModel inv in ViewBag.NewestBatches)
                             {
-                                b = inv;
+                                batch = inv;
                                 a++;
                             }
 
 
                         }
-                                <tr>
-                                    <th id="indexOf_@x" scope="row">@x</th>
-                                    <td id="idOf_@x">@b.ID</td>
-                                    <td id="nameOf_@x">@b.NameOf</td>
-                                    <td id="batchTotal_@x">@b.Total</td>
-                                    <td id="completion_@x">@b.Completion</td>
-                                </tr>
-                        }
+                        <tr>
+                            <th id="indexOf_@x" scope="row">@x</th>
+                            <td id="idOf_@x">@batch.ID</td>
+                            <td id="nameOf_@x">@batch.NameOf</td>
+                            <td id="batchTotal_@x">@batch.Total</td>
+                            <td id="completion_@x">@batch.Completion</td>
+                        </tr>
                     }
+                }
 
-                      
-                    </tbody>
+
+            </tbody>
         </table>
 
         <div class="card-header">
             expires next:
-            </div>
+        </div>
+        <div class="list-group">
             @{
-                    <div class="list-group">
-                        @foreach (BatchModel inv in ViewBag.ExpiresNext)
+                int b = 0;
+                for (int x = 0; x < 10; x++)
+                {
+                    BatchModel batch = new BatchModel();
+
+                    if (x < b)
+                    {
+                        foreach (BatchModel inv in ViewBag.ExpiresNext)
                         {
-                            <div class="list-group-item">
-                                @inv.ID
-                            </div>
-                            <div class="list-group-item">
-                                @inv.NameOf
-                            </div>
-                            <div class="list-group-item">
-                                @inv.Total
-                            </div>
-                            <div class="list-group-item">
-                                this batch expires: @inv.Expiration
-                            </div>
+                            batch = inv;
+                            b++;
                         }
+
+
+                    }
+                    <div id="idOf_Exp_@x" ; class="list-group-item">
+                        @batch.ID
                     </div>
+                    <div id="nameOf_Exp_@x" ; class="list-group-item">
+                        @batch.NameOf
+                    </div>
+                    <div id="totalOf_Exp_@x" ; class="list-group-item">
+                        @batch.Total
+                    </div>
+                    <div id="expOf_Exp_@x" ; class="list-group-item">
+                        this batch expires: @batch.Expiration
+                    </div>
+                }
+
+
+
+                @*int b = 0;
+                foreach (BatchModel inv in ViewBag.ExpiresNext)
+                {
+                    <div id="idOf_Exp_@b" ; class="list-group-item">
+                        @inv.ID
+                    </div>
+                    <div id="nameOf_Exp_@b" ; class="list-group-item">
+                        @inv.NameOf
+                    </div>
+                    <div id="totalOf_Exp_@b" ; class="list-group-item">
+                        @inv.Total
+                    </div>
+                    <div id="expOf_Exp_@b" ; class="list-group-item">
+                        this batch expires: @inv.Expiration
+                    </div>
+                }*@
+
             }
 
-
-            <button id="getBatchesBtn" class="btn btn-light">@Html.ActionLink("get", "GetBatches")</button>
-            <button id="getBatchesBtn" class="btn btn-light">update</button>
-            <button id="getBatchesBtn" class="btn btn-light">create</button>
-   
-
-        <script type="text/javascript">
-            $(function () {
-                $("#runBatchesSim").click(function () {
-
-                    $.ajax({
-                        url: '/Home/GetMostRecentBatches',
-                        type: 'GET',
-                        dataType: 'json',
-                        /*How does this compete with Index() on app load?*/
-                        success: function (data) {
-                            if (data.length > 0) {
-
-                                var parsedData = JSON.parse(data);
-
-                                for (let i = 0; i < data.length; i++) {
+        </div>
 
 
-                                    document.getElementById("indexOf_" + i).innerHTML = i;
-                                    // $('indexOf_' + i).val(i);
-                                    document.getElementById("idOf_" + i).innerHTML = parsedData[i].ID;
-                                    // $('idOf_' + i).val(result[i].ID);
-                                    document.getElementById("nameOf_" + i).innerHTML = parsedData[i].NameOf;
-                                    // $('nameOf_' + i).val(result[i].NameOf);
-                                    document.getElementById("batchTotal_" + i).innerHTML = parsedData[i].Total;
-                                    // $('batchTotal_' + i).val(result[i].Total);
-                                    document.getElementById("completion_" + i).innerHTML = parsedData[i].Completion;
-                                    // $('completion_' + i).val(result[i].Completion);
+
+            <script type="text/javascript">
+                $(function () {
+                    $("#runBatchesSim").click(function () {
+
+                        // Update most recently created.
+                        $.ajax({
+                            url: '/Home/GetMostRecentBatchesFromS_Proc',
+                            type: 'GET',
+                            dataType: 'json',
+                            success: function (data) {
+                                if (data.length > 0) {
+
+                                    var parsedData = JSON.parse(data);
+
+                                    for (let i = 0; i < data.length; i++) {
+
+
+                                        document.getElementById("indexOf_" + i).innerHTML = i;
+                                        // $('indexOf_' + i).val(i);
+                                        document.getElementById("idOf_" + i).innerHTML = parsedData[i].ID;
+                                        // $('idOf_' + i).val(result[i].ID);
+                                        document.getElementById("nameOf_" + i).innerHTML = parsedData[i].NameOf;
+                                        // $('nameOf_' + i).val(result[i].NameOf);
+                                        document.getElementById("batchTotal_" + i).innerHTML = parsedData[i].Total;
+                                        // $('batchTotal_' + i).val(result[i].Total);
+                                        document.getElementById("completion_" + i).innerHTML = parsedData[i].Completion;
+                                        // $('completion_' + i).val(result[i].Completion);
+
+
+                                    }
 
 
                                 }
+                                else {
+                                    alert("FAILED");
+                                }
+
 
 
                             }
-                            else {
-                                alert("FAILED");
+                        });
+
+                        // Update expires next.
+                        $.ajax({
+                            url: '/Home/GetExpiresNext',
+                            type: 'GET',
+                            dataType: 'json',
+                            success: function (data) {
+                                if (data.length > 0) {
+
+                                    var parsedData = JSON.parse(data);
+
+                                    for (let i = 0; i < data.length; i++) {
+
+
+                                        document.getElementById("idOf_Exp_" + i).innerHTML = parsedData[i].ID;
+                                        // $('indexOf_' + i).val(i);
+                                        document.getElementById("nameOf_Exp_" + i).innerHTML = parsedData[i].NameOf;
+                                        // $('idOf_' + i).val(result[i].ID);
+                                        document.getElementById("totalOf_Exp_" + i).innerHTML = parsedData[i].Total;
+                                        // $('nameOf_' + i).val(result[i].NameOf);
+                                        document.getElementById("expOf_Exp_" + i).innerHTML = parsedData[i].Expiration;
+                                        // $('batchTotal_' + i).val(result[i].Total);
+
+
+                                    }
+
+
+                                }
+                                else {
+                                    alert("FAILED");
+                                }
+
+
+
                             }
+                        });
+                    })
+                });
+            </script>
 
 
-
-                        }
-                    });
-                })
-            });
-        </script>
-        <script type="text/javascript">
+            <script type="text/javascript">
             // Can we wait for 20s to show changes?
             function setDefaultValues() {
-                @{ 
+                @{
                     int i = 0;
                     for (i = 0; i < 10; i++)
                     {
@@ -163,7 +234,7 @@
                     }
 
             }
-        </script>
+            </script>
 </body>
 </html>
 
