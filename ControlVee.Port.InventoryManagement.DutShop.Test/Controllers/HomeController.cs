@@ -29,7 +29,6 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test.Controllers
                 connection.ConnectionString = cstring;
 
                 context = new DataAccess(connection);
-                context.RunStoredProcSim();
             }
         }
 
@@ -86,6 +85,7 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test.Controllers
         }
 
         [HttpGet]
+        // TODO: Returns two obj from S_Proc.
         public IActionResult GetMostRecentBatches()
         {
             batches = new List<BatchModel>();
@@ -94,9 +94,11 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test.Controllers
                 connection.ConnectionString = cstring;
 
                 context = new DataAccess(connection);
-            
-                if(context.RunStoredProcSim())
+
+                if (context.RunStoredProcSim())
+                {
                     batches = context.GetJustUpdatedBatchesFromDb();
+                }
                
             };
 
