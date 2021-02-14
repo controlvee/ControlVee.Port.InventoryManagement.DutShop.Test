@@ -29,7 +29,7 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test
             this.connection = connection;
         }
 
-        public List<BatchModel> RunStoredProcSim()
+        public bool RunStoredProcSim()
         {
             bool updated = false;
 
@@ -48,7 +48,7 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test
                 }
             }
 
-            return batches;
+            return updated;
         }
 
         #region DbActions
@@ -87,7 +87,33 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test
             {
                 string text = $"SELECT * FROM {dbName}.{batchesTable} " +
                     $"WHERE completion >= DATEADD(MINUTE, -5, GETDATE()) " +
-                    $"AND completion >= DATEADD(MINUTE, 5, GETDATE())";
+                    $"AND completion <= DATEADD(MINUTE, 5, GETDATE())";
+                command.CommandText = text;
+                command.CommandType = System.Data.CommandType.Text;
+
+                using (System.Data.IDataReader reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        batches.Add(MapJustUpdatedBatchcesFromDb(reader));
+                    }
+                }
+            }
+
+            return batches;
+        }
+
+        public List<BatchModel> GetFirstExpiredBatchFromDb()
+        {
+            batches = new List<BatchModel>();
+
+            // TODO.
+            AssuredConnected();
+            using (System.Data.IDbCommand command = connection.CreateCommand())
+            {
+                string text = $"SELECT * FROM {dbName}.{batchesTable} " +
+                    $"WHERE completion >= DATEADD(MINUTE, -5, GETDATE()) " +
+                    $"AND completion <= DATEADD(MINUTE, 5, GETDATE())";
                 command.CommandText = text;
                 command.CommandType = System.Data.CommandType.Text;
 

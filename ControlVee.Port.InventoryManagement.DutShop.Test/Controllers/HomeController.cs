@@ -94,7 +94,10 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test.Controllers
 
                 context = new DataAccess(connection);
                 // Randomize here.
-                batches = context.RunStoredProcSim();
+                if (context.RunStoredProcSim())
+                {
+                    batches = context.GetJustUpdatedBatchesFromDb();
+                }
             };
 
             string json = JsonConvert.SerializeObject(batches);
