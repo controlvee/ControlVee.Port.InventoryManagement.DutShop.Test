@@ -14,9 +14,14 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test
         private readonly string salesTable = "dbo.Sales";
         private readonly string storedProc_SimulateBatches = "SimulateBatches";
         private readonly string storedProc_GetInventory = "GetOnHandInventory";
+        private List<BatchModel> batches;
+        private InventoryOnHandModel inv;
+        private BatchModel batch;
 
         public DataAccess()
         {
+            batches = new List<BatchModel>();
+            inv = new InventoryOnHandModel();
         }
 
         public DataAccess(System.Data.IDbConnection connection)
@@ -24,7 +29,7 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test
             this.connection = connection;
         }
 
-        public bool RunStoredProcSim()
+        public List<BatchModel> RunStoredProcSim()
         {
             bool updated = false;
 
@@ -43,7 +48,7 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test
                 }
             }
 
-            return updated;
+            return batches;
         }
 
         #region DbActions
@@ -55,8 +60,10 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test
             AssuredConnected();
             using (System.Data.IDbCommand command = connection.CreateCommand())
             {
-                command.CommandText = storedProc_GetInventory;
-                command.CommandType = System.Data.CommandType.StoredProcedure;
+                string text = $"select * from {dbName}.{onHandInventoryTable} ";
+                command.CommandText = text;
+                command.CommandType = System.Data.CommandType.Text;
+                
 
                 using (System.Data.IDataReader reader = command.ExecuteReader())
                 {
@@ -70,15 +77,17 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test
             return inv;
         }
 
-        public List<BatchModel> GetBatchesFromDb()
+        public List<BatchModel> GetJustUpdatedBatchesFromDb()
         {
-            List<BatchModel> b = new List<BatchModel>();
+            batches = new List<BatchModel>();
 
             // TODO.
             AssuredConnected();
             using (System.Data.IDbCommand command = connection.CreateCommand())
             {
-                string text = $"select * from {dbName}.{batchesTable}";
+                string text = $"SELECT * FROM {dbName}.{batchesTable} " +
+                    $"WHERE completion >= DATEADD(MINUTE, -5, GETDATE()) " +
+                    $"AND completion >= DATEADD(MINUTE, 5, GETDATE())";
                 command.CommandText = text;
                 command.CommandType = System.Data.CommandType.Text;
 
@@ -86,12 +95,12 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test
                 {
                     while (reader.Read())
                     {
-                        b.Add(MapBatchesToDb(reader));
+                        batches.Add(MapJustUpdatedBatchcesFromDb(reader));
                     }
                 }
             }
 
-            return b;
+            return batches;
         }
 
         public BatchModel GetBatchesByIdFromDb(int id)
@@ -111,7 +120,7 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test
                     return null;
                 }
 
-                BatchModel b = MapBatchesToDb(reader);
+                BatchModel b = MapJustUpdatedBatchcesFromDb(reader);
                 if (reader.Read())
                 {
                     throw new Exception($"Found more than one matching record with name: {id}.");
@@ -123,17 +132,16 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test
         #endregion
 
         #region Db Mappings
-        public BatchModel MapBatchesToDb(System.Data.IDataReader reader)
+        public BatchModel MapJustUpdatedBatchcesFromDb(System.Data.IDataReader reader)
         {
             // TODO.
-            BatchModel b = new BatchModel();
+            batch = new BatchModel();
+            batch.ID = (int)reader["ID"];
+            batch.NameOf = (string)reader["nameOf"];
+            batch.Total = (int)reader["total"];
+            batch.Completion = (DateTime)reader["completion"];
 
-            b.ID = (int)reader["ID"];
-            b.NameOf = (string)reader["nameOf"];
-            b.Total = (int)reader["total"];
-            b.Completion = (DateTime)reader["completion"];
-
-            return b;
+            return batch;
         }
 
         public InventoryOnHandModel MapTotalOnHandInvetoryToDb(System.Data.IDataReader reader)
@@ -143,6 +151,7 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test
 
             inv.NameOf = (string)reader["nameOf"];
             inv.Total = (int)reader["total"];
+            inv.Expiration = (DateTime)reader["expire"];
 
             return inv;
         } 

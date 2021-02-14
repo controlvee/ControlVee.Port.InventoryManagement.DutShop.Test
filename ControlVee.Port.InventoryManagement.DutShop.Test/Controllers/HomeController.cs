@@ -10,6 +10,7 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test.Controllers
 {
     /// <summary>
     ///  TODO: Handles nulls in Models and Db.
+    ///  TODO: Save SProcs and clean up.
     /// </summary>
     public class HomeController : Controller
     {
@@ -34,7 +35,7 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test.Controllers
 
                 context = new DataAccess(connection);
                 
-                batches = context.GetBatchesFromDb();
+                batches = context.GetJustUpdatedBatchesFromDb();
                
                 batches.OrderBy(b => b.Completion);
                 inv = context.GetOnHandInventoryFromDb();
@@ -57,7 +58,7 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test.Controllers
 
                 context = new DataAccess(connection);
 
-                batches = context.GetBatchesFromDb();
+                batches = context.GetJustUpdatedBatchesFromDb();
             };
 
             return View("Index"); 
@@ -93,14 +94,7 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test.Controllers
 
                 context = new DataAccess(connection);
                 // Randomize here.
-                if (context.RunStoredProcSim())
-                {
-                    batches = context.GetBatchesFromDb();
-                }
-                else
-                {
-                    // Handle.
-                }
+                batches = context.RunStoredProcSim();
             };
 
             string json = JsonConvert.SerializeObject(batches);
