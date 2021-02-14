@@ -11,6 +11,8 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test.Controllers
     /// <summary>
     ///  TODO: Handles nulls in Models and Db.
     ///  TODO: Save SProcs and clean up.
+    ///  TODO: S_Proc for dbo.Batches in progress to delete
+    ///  after x-time to simulate completion.
     /// </summary>
     public class HomeController : Controller
     {
@@ -36,20 +38,18 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test.Controllers
                 context = new DataAccess(connection);
                 
                 batches = context.GetJustUpdatedBatchesFromDb();
-               
-                batches.OrderBy(b => b.Completion);
-                inv = context.GetOnHandInventoryFromDb();
+                inv = context.GetExpiresNextInventoryFromDb();
             };
 
-            ViewBag.Batches = batches;
-            ViewBag.Inventory = inv;
+            ViewBag.NewestBatches = batches.OrderBy(b => b.Completion);
+            ViewBag.ExpiresNext = inv;
 
             return View();
         }
        
         
-
-        public IActionResult GetBatches()
+        // Change to past any time.
+        public IActionResult GetBatchesPastFiveMinutes()
         {
             batches = new List<BatchModel>();
             using (var connection = new System.Data.SqlClient.SqlConnection())
@@ -79,13 +79,8 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test.Controllers
             return View("Index");
         }
 
-        public IActionResult UpdateBatches()
-        {
-            return View("Index");
-        }
-
         [HttpGet]
-        public IActionResult StartRandomBatches()
+        public IActionResult GetMostRecentBatches()
         {
             batches = new List<BatchModel>();
             using (var connection = new System.Data.SqlClient.SqlConnection())
@@ -93,16 +88,20 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test.Controllers
                 connection.ConnectionString = cstring;
 
                 context = new DataAccess(connection);
-                // Randomize here.
-                if (context.RunStoredProcSim())
-                {
+            
+                if(context.RunStoredProcSim())
                     batches = context.GetJustUpdatedBatchesFromDb();
-                }
+               
             };
 
             string json = JsonConvert.SerializeObject(batches);
 
             return Json(json);
+        }
+
+        public IActionResult UpdateBatches()
+        {
+            return View("Index");
         }
     }
 }

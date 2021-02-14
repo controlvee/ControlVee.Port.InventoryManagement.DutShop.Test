@@ -14,14 +14,15 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test
         private readonly string salesTable = "dbo.Sales";
         private readonly string storedProc_SimulateBatches = "SimulateBatches";
         private readonly string storedProc_GetInventory = "GetOnHandInventory";
+        private readonly string storedProc_GetExpiresNext = "GetInventoryTotals_Expire_MIN";
         private List<BatchModel> batches;
-        private InventoryOnHandModel inv;
+        private List<InventoryOnHandModel> inv;
         private BatchModel batch;
 
         public DataAccess()
         {
             batches = new List<BatchModel>();
-            inv = new InventoryOnHandModel();
+            inv = new List<InventoryOnHandModel>();
         }
 
         public DataAccess(System.Data.IDbConnection connection)
@@ -95,7 +96,7 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test
                 {
                     while (reader.Read())
                     {
-                        batches.Add(MapJustUpdatedBatchcesFromDb(reader));
+                        batches.Add(MapBatchcesFromDb(reader));
                     }
                 }
             }
@@ -103,30 +104,27 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test
             return batches;
         }
 
-        public List<BatchModel> GetFirstExpiredBatchFromDb()
+        public List<InventoryOnHandModel> GetExpiresNextInventoryFromDb()
         {
-            batches = new List<BatchModel>();
+            inv = new List<InventoryOnHandModel>();
 
             // TODO.
             AssuredConnected();
             using (System.Data.IDbCommand command = connection.CreateCommand())
             {
-                string text = $"SELECT * FROM {dbName}.{batchesTable} " +
-                    $"WHERE completion >= DATEADD(MINUTE, -5, GETDATE()) " +
-                    $"AND completion <= DATEADD(MINUTE, 5, GETDATE())";
-                command.CommandText = text;
-                command.CommandType = System.Data.CommandType.Text;
+                command.CommandText = storedProc_GetExpiresNext;
+                command.CommandType = System.Data.CommandType.StoredProcedure;
 
                 using (System.Data.IDataReader reader = command.ExecuteReader())
                 {
                     while (reader.Read())
                     {
-                        batches.Add(MapJustUpdatedBatchcesFromDb(reader));
+                        inv.Add(MapTotalOnHandInvetoryToDb(reader));
                     }
                 }
             }
 
-            return batches;
+            return inv;
         }
 
         public BatchModel GetBatchesByIdFromDb(int id)
@@ -146,7 +144,7 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test
                     return null;
                 }
 
-                BatchModel b = MapJustUpdatedBatchcesFromDb(reader);
+                BatchModel b = MapBatchcesFromDb(reader);
                 if (reader.Read())
                 {
                     throw new Exception($"Found more than one matching record with name: {id}.");
@@ -158,7 +156,7 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test
         #endregion
 
         #region Db Mappings
-        public BatchModel MapJustUpdatedBatchcesFromDb(System.Data.IDataReader reader)
+        public BatchModel MapBatchcesFromDb(System.Data.IDataReader reader)
         {
             // TODO.
             batch = new BatchModel();

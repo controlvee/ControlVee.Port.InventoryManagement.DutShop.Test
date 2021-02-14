@@ -19,7 +19,7 @@
     <div class="container">
         <div class="container">
             <div class="card-header">
-                batches in progress
+                newest batches:
                 <button id="runBatchesSim" class="btn float-right">insert | get random</button>
             </div>
 
@@ -37,7 +37,7 @@
             </thead>
             @{
                 int i = 0;
-                foreach (BatchModel batch in ViewBag.Batches)
+                foreach (BatchModel batch in ViewBag.NewestBatches)
                 {
                     <tbody>
                         <tr>
@@ -54,10 +54,12 @@
             }
         </table>
 
-
-        @{
+        <div class="card-header">
+            expires next:
+            </div>
+            @{
                 <div class="list-group">
-                    @foreach (InventoryOnHandModel inv in ViewBag.Inventory)
+                    @foreach (InventoryOnHandModel inv in ViewBag.ExpiresNext)
                     {
                         <div class="list-group-item">
                             @inv.NameOf
@@ -66,69 +68,69 @@
                             @inv.Total
                         </div>
                         <div class="list-group-item">
-                            First expires: @inv.Expiration 
+                            First expires: @inv.Expiration
                         </div>
                     }
                 </div>
-        }
+            }
 
 
-        <button id="getBatchesBtn" class="btn btn-light">@Html.ActionLink("get", "GetBatches")</button>
-        <button id="getBatchesBtn" class="btn btn-light">update</button>
-        <button id="getBatchesBtn" class="btn btn-light">create</button>
-    </div>
-   
-    <script type="text/javascript">
-        $(function () {
-            $("#runBatchesSim").click(function () {
+            <button id="getBatchesBtn" class="btn btn-light">@Html.ActionLink("get", "GetBatches")</button>
+            <button id="getBatchesBtn" class="btn btn-light">update</button>
+            <button id="getBatchesBtn" class="btn btn-light">create</button>
+        </div>
 
-                $.ajax({
-                    url: '/Home/StartRandomBatches',
-                    type: 'GET',
-                    dataType: 'json',
-                    /*How does this compete with Index() on app load?*/
-                    success: function (data) {
-                        if (data.length > 0) {
+        <script type="text/javascript">
+            $(function () {
+                $("#runBatchesSim").click(function () {
 
-                            var parsedData = JSON.parse(data);
+                    $.ajax({
+                        url: '/Home/GetMostRecentBatches',
+                        type: 'GET',
+                        dataType: 'json',
+                        /*How does this compete with Index() on app load?*/
+                        success: function (data) {
+                            if (data.length > 0) {
 
-                            for (let i = 0; i < data.length; i++) {
+                                var parsedData = JSON.parse(data);
+
+                                for (let i = 0; i < data.length; i++) {
 
 
-                                document.getElementById("indexOf_" + i).innerHTML = i;
-                                // $('indexOf_' + i).val(i);
-                                document.getElementById("idOf_" + i).innerHTML = parsedData[i].ID;
-                                // $('idOf_' + i).val(result[i].ID);
-                                document.getElementById("nameOf_" + i).innerHTML = parsedData[i].NameOf;
-                                // $('nameOf_' + i).val(result[i].NameOf);
-                                document.getElementById("batchTotal_" + i).innerHTML = parsedData[i].Total;
-                                // $('batchTotal_' + i).val(result[i].Total);
-                                document.getElementById("completion_" + i).innerHTML = parsedData[i].Completion;
-                                // $('completion_' + i).val(result[i].Completion);
+                                    document.getElementById("indexOf_" + i).innerHTML = i;
+                                    // $('indexOf_' + i).val(i);
+                                    document.getElementById("idOf_" + i).innerHTML = parsedData[i].ID;
+                                    // $('idOf_' + i).val(result[i].ID);
+                                    document.getElementById("nameOf_" + i).innerHTML = parsedData[i].NameOf;
+                                    // $('nameOf_' + i).val(result[i].NameOf);
+                                    document.getElementById("batchTotal_" + i).innerHTML = parsedData[i].Total;
+                                    // $('batchTotal_' + i).val(result[i].Total);
+                                    document.getElementById("completion_" + i).innerHTML = parsedData[i].Completion;
+                                    // $('completion_' + i).val(result[i].Completion);
+
+
+                                }
 
 
                             }
+                            else {
+                                alert("FAILED");
+                            }
+
 
 
                         }
-                        else {
-                            alert("FAILED");
-                        }
-
-
-
-                    }
-                });
-            })
-        });
-    </script>
-    <script type="text/javascript">
-        // Can we wait for 20s to show changes?
-        function HighLightRowUntilPageRe(clicked_id) {
-            var el = document.getElementById(clicked_id);
-            el.style.backgroundColor = "yellow";
-        }
-    </script>
+                    });
+                })
+            });
+        </script>
+        <script type="text/javascript">
+            // Can we wait for 20s to show changes?
+            function HighLightRowUntilPageRe(clicked_id) {
+                var el = document.getElementById(clicked_id);
+                el.style.backgroundColor = "yellow";
+            }
+        </script>
 </body>
 </html>
 
