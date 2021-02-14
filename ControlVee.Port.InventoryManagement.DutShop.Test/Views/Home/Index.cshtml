@@ -1,0 +1,131 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" />
+    <link rel="stylesheet" href="~/css/Chart.css" />
+    <link rel="stylesheet" href="~/css/Chart.min.css" />
+    <!--Can we move these?-->
+    <script src="~/Scripts/jquery-1.10.2.js"></script>
+    <script src="~/Scripts/jquery.unobtrusive-ajax.js"></script>
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+</head>
+<body>
+
+    <div class="container">
+        <div class="container">
+            <div class="card-header">
+                batches in progress
+                <button id="runBatchesSim" class="btn float-right">insert | get random</button>
+            </div>
+
+        </div>
+
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col"></th>
+                    <th scope="col">ID</th>
+                    <th scope="col">Name</th>
+                    <th scope="col">Total</th>
+                    <th scope="col">ETC</th>
+                </tr>
+            </thead>
+            @{
+                int i = 0;
+                foreach (BatchModel batch in ViewBag.Batches)
+                {
+                    <tbody>
+                        <tr>
+                            <th id="indexOf_@i" scope="row">@i</th>
+                            <td id="idOf_@i">@batch.ID</td>
+                            <td id="nameOf_@i">@batch.NameOf</td>
+                            <td id="batchTotal_@i">@batch.Total</td>
+                            <td id="completion_@i">@batch.Completion</td>
+                        </tr>
+                    </tbody>
+
+                    i++;
+                }
+            }
+        </table>
+
+
+        @{
+                <div class="list-group">
+                    @foreach (InventoryOnHandModel inv in ViewBag.Inventory)
+                    {
+                        <div class="list-group-item">
+                            @inv.NameOf
+                        </div>
+                        <div class="list-group-item">
+                            @inv.Total
+                        </div>
+                    }
+                </div>
+        }
+
+
+        <button id="getBatchesBtn" class="btn btn-light">@Html.ActionLink("get", "GetBatches")</button>
+        <button id="getBatchesBtn" class="btn btn-light">update</button>
+        <button id="getBatchesBtn" class="btn btn-light">create</button>
+    </div>
+   
+    <script type="text/javascript">
+        $(function () {
+            $("#runBatchesSim").click(function () {
+
+                $.ajax({
+                    url: '/Home/StartRandomBatches',
+                    type: 'GET',
+                    dataType: 'json',
+                    /*How does this compete with Index() on app load?*/
+                    success: function (data) {
+                        if (data.length > 0) {
+
+                            var parsedData = JSON.parse(data);
+
+                            for (let i = 0; i < data.length; i++) {
+
+
+                                document.getElementById("indexOf_" + i).innerHTML = i;
+                                // $('indexOf_' + i).val(i);
+                                document.getElementById("idOf_" + i).innerHTML = parsedData[i].ID;
+                                // $('idOf_' + i).val(result[i].ID);
+                                document.getElementById("nameOf_" + i).innerHTML = parsedData[i].NameOf;
+                                // $('nameOf_' + i).val(result[i].NameOf);
+                                document.getElementById("batchTotal_" + i).innerHTML = parsedData[i].Total;
+                                // $('batchTotal_' + i).val(result[i].Total);
+                                document.getElementById("completion_" + i).innerHTML = parsedData[i].Completion;
+                                // $('completion_' + i).val(result[i].Completion);
+
+
+                            }
+
+
+                        }
+                        else {
+                            alert("FAILED");
+                        }
+
+
+
+                    }
+                });
+            })
+        });
+    </script>
+    <script type="text/javascript">
+        // Can we wait for 20s to show changes?
+        function HighLightRowUntilPageRe(clicked_id) {
+            var el = document.getElementById(clicked_id);
+            el.style.backgroundColor = "yellow";
+        }
+    </script>
+</body>
+</html>
+
