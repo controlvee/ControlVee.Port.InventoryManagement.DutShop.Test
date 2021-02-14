@@ -14,7 +14,7 @@
     <script src="~/Scripts/jquery.unobtrusive-ajax.js"></script>
     <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
 </head>
-<body>
+<body onload="setDefaultValues()">
 
     <div class="container">
         <div class="container">
@@ -39,6 +39,7 @@
                 int i = 0;
                 foreach (BatchModel batch in ViewBag.NewestBatches)
                 {
+
                     <tbody>
                         <tr>
                             <th id="indexOf_@i" scope="row">@i</th>
@@ -58,20 +59,35 @@
             expires next:
             </div>
             @{
-                <div class="list-group">
-                    @foreach (InventoryOnHandModel inv in ViewBag.ExpiresNext)
-                    {
-                        <div class="list-group-item">
-                            @inv.NameOf
-                        </div>
-                        <div class="list-group-item">
-                            @inv.Total
-                        </div>
-                        <div class="list-group-item">
-                            First expires: @inv.Expiration
-                        </div>
-                    }
-                </div>
+                    <div class="list-group">
+                        @for (i = 0; i < 10; i++)
+                        {
+                            BatchModel b = new BatchModel();
+                            {
+                                if (i < ViewBag.ExpiresNext.Count)
+                                @foreach (BatchModel inv in ViewBag.ExpiresNext)
+                                    {
+                                        b = inv;
+                                        i++;
+                                    }
+                            }
+
+                            <div class="list-group-item">
+                                @b.ID
+                            </div>
+                            <div class="list-group-item">
+                                @b.NameOf
+                            </div>
+                            <div class="list-group-item">
+                                @b.Total
+                            </div>
+                            <div class="list-group-item">
+                                this batch expires: @b.Expiration
+                            </div>
+
+                            i++;
+                        }
+                    </div>
             }
 
 
@@ -126,10 +142,25 @@
         </script>
         <script type="text/javascript">
             // Can we wait for 20s to show changes?
-            function HighLightRowUntilPageRe(clicked_id) {
-                var el = document.getElementById(clicked_id);
-                el.style.backgroundColor = "yellow";
-            }
+            @*function setDefaultValues() {
+
+                @for(i = 0; i < 10; i++)
+                {
+                    <text>
+                        var a = document.getElementById(idOf_@i);
+                        a.setDefaultValue = "unk";
+                        var b = document.getElementById(nameOf_@i);
+                        b.setDefaultValue = "unk";
+                        var c = document.getElementById(batchTotal_@i);
+                        c.setDefaultValue = "unk";
+                        var d = document.getElementById(completion_@i);
+                        d.setDefaultValue = "unk";
+                    </text>
+                }
+
+
+
+            }*@
         </script>
 </body>
 </html>

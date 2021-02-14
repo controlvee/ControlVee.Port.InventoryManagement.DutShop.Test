@@ -86,9 +86,7 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test
             AssuredConnected();
             using (System.Data.IDbCommand command = connection.CreateCommand())
             {
-                string text = $"SELECT * FROM {dbName}.{batchesTable} " +
-                    $"WHERE completion >= DATEADD(MINUTE, -5, GETDATE()) " +
-                    $"AND completion <= DATEADD(MINUTE, 5, GETDATE())";
+                string text = $"SELECT TOP 10 * FROM {dbName}.{batchesTable}";
                 command.CommandText = text;
                 command.CommandType = System.Data.CommandType.Text;
 
@@ -96,7 +94,7 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test
                 {
                     while (reader.Read())
                     {
-                        batches.Add(MapBatchcesFromDb(reader));
+                        batches.Add(MapBatchesFromDb(reader));
                     }
                 }
             }
@@ -104,9 +102,9 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test
             return batches;
         }
 
-        public List<InventoryOnHandModel> GetExpiresNextInventoryFromDb()
+        public List<BatchModel> GetExpiresNextByBatchFromDb()
         {
-            inv = new List<InventoryOnHandModel>();
+            batches = new List<BatchModel>();
 
             // TODO.
             AssuredConnected();
@@ -119,12 +117,12 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test
                 {
                     while (reader.Read())
                     {
-                        inv.Add(MapTotalOnHandInvetoryToDb(reader));
+                        batches.Add(MapBatchesFromDb(reader));
                     }
                 }
             }
 
-            return inv;
+            return batches;
         }
 
         public BatchModel GetBatchesByIdFromDb(int id)
@@ -144,7 +142,7 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test
                     return null;
                 }
 
-                BatchModel b = MapBatchcesFromDb(reader);
+                BatchModel b = MapBatchesFromDb(reader);
                 if (reader.Read())
                 {
                     throw new Exception($"Found more than one matching record with name: {id}.");
@@ -156,7 +154,7 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test
         #endregion
 
         #region Db Mappings
-        public BatchModel MapBatchcesFromDb(System.Data.IDataReader reader)
+        public BatchModel MapBatchesFromDb(System.Data.IDataReader reader)
         {
             // TODO.
             batch = new BatchModel();
@@ -164,6 +162,7 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test
             batch.NameOf = (string)reader["nameOf"];
             batch.Total = (int)reader["total"];
             batch.Completion = (DateTime)reader["completion"];
+            batch.Expiration = (DateTime)reader["expire"];
 
             return batch;
         }

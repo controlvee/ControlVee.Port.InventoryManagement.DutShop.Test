@@ -17,20 +17,26 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test.Controllers
     public class HomeController : Controller
     {
         private List<BatchModel> batches;
+        private List<BatchModel> expiresNext;
         private List<InventoryOnHandModel> inv;
         private readonly string cstring = @"Data Source=(localdb)\mssqllocaldb;Database=DutShop;Integrated Security=True";
         private DataAccess context;
-        
+
         public HomeController()
         {
-           
+            using (var connection = new System.Data.SqlClient.SqlConnection())
+            {
+                connection.ConnectionString = cstring;
+
+                context = new DataAccess(connection);
+                context.RunStoredProcSim();
+            }
         }
 
         public IActionResult Index()
         {
             batches = new List<BatchModel>();
-            inv = new List<InventoryOnHandModel>();
-
+            expiresNext = new List<BatchModel>();
             using (var connection = new System.Data.SqlClient.SqlConnection())
             {
                 connection.ConnectionString = cstring;
@@ -38,11 +44,11 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test.Controllers
                 context = new DataAccess(connection);
                 
                 batches = context.GetJustUpdatedBatchesFromDb();
-                inv = context.GetExpiresNextInventoryFromDb();
+                expiresNext = context.GetExpiresNextByBatchFromDb();
             };
 
             ViewBag.NewestBatches = batches.OrderBy(b => b.Completion);
-            ViewBag.ExpiresNext = inv;
+            ViewBag.ExpiresNext = expiresNext;
 
             return View();
         }
