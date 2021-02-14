@@ -13,7 +13,7 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test
         private readonly string onHandInventoryTable = "dbo.OnHandInventory";
         private readonly string salesTable = "dbo.Sales";
         private readonly string storedProc_SimulateBatches = "SimulateBatches";
-        private readonly string storedProc_GetInventory = "GetOnHandInventory";
+        private readonly string storedProc_GetInventoryTotalsByType = "GetOnHandInventoryTotals";
         private readonly string storedProc_GetExpiresNext = "GetInventoryTotals_Expire_MIN";
         private List<BatchModel> batches;
         private List<InventoryOnHandModel> inv;
@@ -53,7 +53,7 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test
         }
 
         #region DbActions
-        public List<InventoryOnHandModel> GetOnHandInventoryFromDb()
+        public List<InventoryOnHandModel> GetOnHandInventoryAllFromDb()
         {
             List<InventoryOnHandModel> inv = new List<InventoryOnHandModel>();
 
@@ -70,7 +70,7 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test
                 {
                     while (reader.Read())
                     {
-                        inv.Add(MapTotalOnHandInvetoryToDb(reader));
+                        inv.Add(MapTotalOnHandInvetoryAllToDb(reader));
                     }
                 }
             }
@@ -82,11 +82,11 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test
         {
             batches = new List<BatchModel>();
 
-            // TODO.
+            // TODO: Change to S_Proc.
             AssuredConnected();
             using (System.Data.IDbCommand command = connection.CreateCommand())
             {
-                string text = $"SELECT TOP 10 * FROM {dbName}.{batchesTable}";
+                string text = $"SELECT TOP 10 * FROM {dbName}.{batchesTable} ORDER BY completion DESC";
                 command.CommandText = text;
                 command.CommandType = System.Data.CommandType.Text;
 
@@ -117,7 +117,30 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test
                 {
                     while (reader.Read())
                     {
-                        inv.Add(MapTotalOnHandInvetoryToDb(reader));
+                        inv.Add(MapTotalOnHandInvetoryAllToDb(reader));
+                    }
+                }
+            }
+
+            return inv;
+        }
+
+        public List<InventoryOnHandModelByType> GetInventoryTotalsByType()
+        {
+            List<InventoryOnHandModelByType> inv = new List<InventoryOnHandModelByType>();
+
+            // TODO.
+            AssuredConnected();
+            using (System.Data.IDbCommand command = connection.CreateCommand())
+            {
+                command.CommandText = storedProc_GetInventoryTotalsByType;
+                command.CommandType = System.Data.CommandType.StoredProcedure;
+
+                using (System.Data.IDataReader reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        inv.Add(MapTotalOnHandInvetoryAllByTypeToDb(reader));
                     }
                 }
             }
@@ -167,9 +190,9 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test
             return batch;
         }
 
-        public InventoryOnHandModel MapTotalOnHandInvetoryToDb(System.Data.IDataReader reader)
+        public InventoryOnHandModel MapTotalOnHandInvetoryAllToDb(System.Data.IDataReader reader)
         {
-            // TODO.
+            // TODO: Add private.
             InventoryOnHandModel inv = new InventoryOnHandModel();
 
             inv = new InventoryOnHandModel();
@@ -181,7 +204,19 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test
             inv.BatchId = (int)reader["batchId"];
 
             return inv;
-        } 
+        }
+
+        public InventoryOnHandModelByType MapTotalOnHandInvetoryAllByTypeToDb(System.Data.IDataReader reader)
+        {
+            // TODO.
+            InventoryOnHandModelByType inv = new InventoryOnHandModelByType();
+
+            inv = new InventoryOnHandModelByType();
+            inv.NameOf = (string)reader["nameOf"];
+            inv.Total = (int)reader["total"];
+
+            return inv;
+        }
         #endregion
 
         private bool AssuredConnected()

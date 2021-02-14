@@ -13,11 +13,13 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test.Controllers
     ///  TODO: Save SProcs and clean up.
     ///  TODO: S_Proc for dbo.Batches in progress to delete
     ///  after x-time to simulate completion.
+    ///  TODO: 0 (zero) in S_Proc.
     /// </summary>
     public class HomeController : Controller
     {
         private List<BatchModel> batches;
         private List<InventoryOnHandModel> expiresNext;
+        private List<InventoryOnHandModelByType> invTotalsByType;
         private readonly string cstring = @"Data Source=(localdb)\mssqllocaldb;Database=DutShop;Integrated Security=True";
         private DataAccess context;
 
@@ -33,8 +35,6 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test.Controllers
 
         public IActionResult Index()
         {
-            batches = new List<BatchModel>();
-           
             using (var connection = new System.Data.SqlClient.SqlConnection())
             {
                 connection.ConnectionString = cstring;
@@ -43,10 +43,13 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test.Controllers
                 
                 batches = context.GetJustUpdatedBatchesFromDb();
                 expiresNext = context.GetExpiresNextByBatchFromDb();
+                invTotalsByType = context.GetInventoryTotalsByType();
             };
 
+            // TODO: Sort here or below methods?  BOTH?
             ViewBag.NewestBatches = batches.OrderBy(b => b.Completion);
-            ViewBag.ExpiresNext = expiresNext;
+            ViewBag.ExpiresNext = expiresNext.OrderBy(b => b.Expiration);
+            ViewBag.InvTotalsByType = invTotalsByType.OrderBy(b => b.NameOf);
 
             return View();
         }
@@ -69,7 +72,7 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test.Controllers
             return View("Index"); 
         }
 
-        public IActionResult GetInventoryOnHand()
+        public IActionResult GetInventoryOnHandAll()
         {
             List<InventoryOnHandModel> inv = new List<InventoryOnHandModel>();
             using (var connection = new System.Data.SqlClient.SqlConnection())
@@ -78,7 +81,7 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test.Controllers
 
                 context = new DataAccess(connection);
 
-                inv = context.GetOnHandInventoryFromDb();
+                inv = context.GetOnHandInventoryAllFromDb();
                 ViewBag.Inventory = inv;
             };
             return View("Index");
@@ -118,14 +121,30 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test.Controllers
                 context = new DataAccess(connection);
 
                 expiresNext = context.GetExpiresNextByBatchFromDb();
-               
             };
 
-            string json = JsonConvert.SerializeObject(expiresNext);
+            string json = JsonConvert.SerializeObject(expiresNext.OrderBy(b => b.Expiration));
 
             return Json(json);
         }
 
+        [HttpGet]
+        public IActionResult GetInventoryOnHandAllByType()
+        {
+            List<InventoryOnHandModelByType> inv = new List<InventoryOnHandModelByType>();
+            using (var connection = new System.Data.SqlClient.SqlConnection())
+            {
+                connection.ConnectionString = cstring;
+
+                context = new DataAccess(connection);
+
+                inv = context.GetInventoryTotalsByType();
+                ViewBag.Inventory = inv;
+            };
+            string json = JsonConvert.SerializeObject(inv);
+
+            return Json(json);
+        }
 
         public IActionResult UpdateBatches()
         {

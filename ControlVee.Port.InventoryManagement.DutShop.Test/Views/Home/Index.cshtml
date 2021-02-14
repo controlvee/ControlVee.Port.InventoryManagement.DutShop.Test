@@ -17,6 +17,47 @@
 <body onload="setDefaultValues()">
 
     <div class="container">
+        <div class="container float-left">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th scope="col">Type</th>
+                        <th scope="col">Total</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    @{
+                        int y = 0;
+                        // 8 is amount of dif types of doughnuts in inventory.
+                        for (int x = 0; x < 8; x++)
+                        {
+                            InventoryOnHandModelByType type = new InventoryOnHandModelByType();
+
+                            if (x < y)
+                            {
+                                foreach (InventoryOnHandModelByType inv in ViewBag.InvTotalsByType)
+                                {
+                                    type = inv;
+                                    y++;
+                                }
+
+
+                            }
+                            <tr>
+                                <th id="indexOfType_@x" scope="row">@x</th>
+                                <td id="nameOfType_@x">@type.NameOf</td>
+                                <td id="batchTotalType_@x">@type.Total</td>
+                            </tr>
+                        }
+                    }
+
+
+                </tbody>
+            </table>
+
+        </div>
         <button id="getBatchesBtn" class="btn btn-light">@Html.ActionLink("get", "GetBatches")</button>
         <button id="getBatchesBtn" class="btn btn-light">update</button>
         <button id="getBatchesBtn" class="btn btn-light">create</button>
@@ -186,7 +227,7 @@
                                     for (let i = 0; i < data.length; i++) {
 
 
-                                        document.getElementById("idOf_Exp_" + i).innerHTML = parsedData[i].ID;
+                                        document.getElementById("idOf_Exp_" + i).innerHTML = parsedData[i].BatchId;
                                         // $('indexOf_' + i).val(i);
                                         document.getElementById("nameOf_Exp_" + i).innerHTML = parsedData[i].NameOf;
                                         // $('idOf_' + i).val(result[i].ID);
@@ -196,6 +237,36 @@
                                         // $('batchTotal_' + i).val(result[i].Total);
 
 
+                                    }
+
+
+                                }
+                                else {
+                                    alert("FAILED");
+                                }
+
+
+
+                            }
+                        });
+
+                        // Update totals by type.
+                        $.ajax({
+                            url: '/Home/GetInventoryOnHandAllByType',
+                            type: 'GET',
+                            dataType: 'json',
+                            success: function (data) {
+                                if (data.length > 0) {
+
+                                    var parsedData = JSON.parse(data);
+
+                                    for (let i = 0; i < data.length; i++) {
+
+
+                                        document.getElementById("nameOfType_" + i).innerHTML = parsedData[i].NameOf;
+                                        // $('idOf_' + i).val(result[i].ID);
+                                        document.getElementById("batchTotalType_" + i).innerHTML = parsedData[i].Total;
+                                        // $('nameOf_' + i).val(result[i].NameOf);
                                     }
 
 
