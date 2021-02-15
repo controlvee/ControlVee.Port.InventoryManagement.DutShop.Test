@@ -59,23 +59,24 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test.Controllers
 
             return View();
         }
-        
 
+      
         [HttpPost]
         public IActionResult CreateBatchRecord(string data)
         {
-            string nameOf = data;
-            int total = 0;
+            // TODO: Handle unterminated string exc.
+            // TODO: Click twice to update batches?
+            var createBatchModel = JsonConvert.DeserializeObject<CreateBatchModel>(data);
 
             using (var connection = new System.Data.SqlClient.SqlConnection())
             {
                 connection.ConnectionString = cstring;
 
                 context = new DataAccess(connection);
-                context.CreateBatchRecord(nameOf, total); 
+                context.CreateBatchRecord(createBatchModel.nameOf, createBatchModel.total); 
             };
 
-            return View("Index");
+            return Json(JsonConvert.SerializeObject("{ message: \"OK200\" }"));
         }
 
         [HttpPost]

@@ -4,7 +4,8 @@ using System.Text;
 
 namespace ControlVee.Port.InventoryManagement.DutShop.Test.Models
 {
-    [Serializable()]
+    // TODO: How does this attri work?
+    [Serializable]
     public class BatchModel 
     {
         public int ID { get; set; }
