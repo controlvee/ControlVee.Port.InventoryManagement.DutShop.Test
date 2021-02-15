@@ -35,6 +35,7 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test
             this.connection = connection;
         }
 
+        #region DbActions
         public bool RunStoredProcSim()
         {
             bool updated = false;
@@ -57,7 +58,6 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test
             return updated;
         }
 
-        #region DbActions
         public List<InventoryOnHandModel> GetOnHandInventoryAllFromDb()
         {
             List<InventoryOnHandModel> inv = new List<InventoryOnHandModel>();
@@ -121,7 +121,7 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test
             return updated;
         }
 
-        internal bool CreateBatchRecord(string nameOf, int total)
+        internal bool CreateBatchRecordFromDb(string nameOf, int total)
         {
             bool updated = false;
 
@@ -202,7 +202,7 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test
             return inv;
         }
 
-        public List<InventoryOnHandModelByType> GetInventoryTotalsByType()
+        public List<InventoryOnHandModelByType> GetInventoryTotalsByTypeFromDb()
         {
             List<InventoryOnHandModelByType> inv = new List<InventoryOnHandModelByType>();
 

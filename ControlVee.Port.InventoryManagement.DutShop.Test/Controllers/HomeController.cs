@@ -49,7 +49,7 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test.Controllers
                 
                 batches = context.GetAllBatchesFromDb();
                 expiresNext = context.GetExpiresNextByBatchFromDb();
-                invTotalsByType = context.GetInventoryTotalsByType();
+                invTotalsByType = context.GetInventoryTotalsByTypeFromDb();
             };
 
             // TODO: Sort here or below methods?  BOTH?
@@ -73,7 +73,7 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test.Controllers
                 connection.ConnectionString = cstring;
 
                 context = new DataAccess(connection);
-                context.CreateBatchRecord(createBatchModel.nameOf, createBatchModel.total); 
+                context.CreateBatchRecordFromDb(createBatchModel.nameOf, createBatchModel.total); 
             };
 
             return Json(JsonConvert.SerializeObject("{ message: \"OK200\" }"));
@@ -90,6 +90,7 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test.Controllers
 
                 if (!context.MoveFromBatchToInventoryOnHandDb(batchId, nameOf, totalMade))
                 {
+                    // Return to ajax call.
                     throw new System.Exception("Move from batch to inventory failed.");
                 }
             };
@@ -161,7 +162,7 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test.Controllers
 
                 context = new DataAccess(connection);
 
-                inv = context.GetInventoryTotalsByType();
+                inv = context.GetInventoryTotalsByTypeFromDb();
                 ViewBag.Inventory = inv;
             };
             string json = JsonConvert.SerializeObject(inv);
