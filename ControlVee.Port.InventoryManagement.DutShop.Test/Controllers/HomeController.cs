@@ -10,7 +10,9 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test.Controllers
 {
     /// <summary>
     ///  TODO: Handles nulls in Models and Db.
-    ///  TODO: Save SProcs and clean up.
+    ///  TODO: Add getallinventory.
+    ///  TODO: Save S_Procs and clean up.
+    ///  TODO: S_Procs for all.
     ///  TODO: S_Proc for dbo.Batches in progress to delete
     ///  after x-time to simulate completion.
     ///  TODO: 0 (zero) in S_Proc.
