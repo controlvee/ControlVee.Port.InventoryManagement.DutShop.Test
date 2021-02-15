@@ -5,6 +5,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" />
     <link rel="stylesheet" href="~/css/Chart.css" />
@@ -15,141 +16,199 @@
     <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
 </head>
 <body>
-    <div class="container-fluid">
-            <div class="row justify-content-sm-center">
-                    <div class="col-4-auto">
-                        <div class="container">
-                            <div class="card-header">
-                                newest batches:
-                            </div>
-                            <table class="table table-sm table-dark table-hover table-striped table-bordered">
-                                <thead>
-                                    <tr>
-                                        <th @*class="col-lg-1"*@ scope="col">ID</th>
-                                        <th @*class="col-lg-9"*@ scope="col">Name</th>
-                                        <th @*class="col-lg-1"*@ scope="col">Total</th>
-                                        <th @*class="col-lg-1"*@ scope="col">Started At</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
 
-                                    @{
-                                        int a = 0;
-                                        // 8 is amount of dif types of doughnuts in inventory.
-                                        for (int x = 0; x < 8; x++)
+
+
+
+
+
+        <div class="row">
+
+            <div class="container">
+
+
+
+
+                <div class="col-6">
+
+
+
+                    <div class="container">
+                        <div class="card-header">
+                            newest batches (qty 50): <span id="isMaxedOut" class="red"></span>
+                        </div>
+                        <ul class="list-group list-unstyled flex-fill pre-scrollable">
+
+                            @{
+                                int a = 0;
+                                // 50 is amount of batches in progress (max).
+                                for (int x = 0; x < 50; x++)
+                                {
+                                    BatchModel batch = new BatchModel();
+
+                                    if (x < a)
+                                    {
+                                        foreach (BatchModel inv in ViewBag.NewestBatches)
                                         {
-                                            BatchModel batch = new BatchModel();
-
-                                            if (x < a)
-                                            {
-                                                foreach (BatchModel inv in ViewBag.NewestBatches)
-                                                {
-                                                    batch = inv;
-                                                    a++;
-                                                }
-                                            }
-                                            <tr>
-                                                <td @*class="col-md-1"*@ id="idOf_@x">@batch.ID</td>
-                                                <td @*class="col-md-9"*@ id="nameOf_@x">@batch.NameOf</td>
-                                                <td @*class="col-md-1"*@ id="batchTotal_@x">@batch.Total</td>
-                                                <td @*class="col-md-1"*@ id="completion_@x">@batch.Started</td>
-                                            </tr>
+                                            batch = inv;
+                                            a++;
                                         }
                                     }
-                                </tbody>
-                            </table>
+                                                        <li class="list-group-item">
+                                                            <div>
+                                                                <div class="form-check form-switch float-left">
+                                                                    <input class="form-check-input" type="checkbox" id="flexSwitchCompleted">
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="form-text float-left" id="idOf_@x">@batch.ID</div>
+                                                            <div id="nameOf_@x">@batch.NameOf</div>
+                                                     
+                                                        
+                                                            <div>
+                                                                <span class="badge bg-primary rounded-pill float-right" id="batchTotal_@x">@batch.Total</span>
+                                                            </div>
+
+                                                            <div id="started_@x">@batch.Started</div>
+
+                                                        </li>
+                                   
+
+
+                                }
+                            }
+                        </ul>
+                        <div class="btn-outline-dark" onclick="">
+                            mark complete (post)
                         </div>
                     </div>
-                    <div class="col-4-auto">
-                        <div class="container">
-                            <div class="card-header">
-                                totals:
-                            </div>
-                            <table class="table table-sm table-dark table-hover table-striped table-bordered">
-                                <thead>
-                                    <tr>
-                                        <th scope="col">Name</th>
-                                        <th scope="col">Total</th>
-                                    </tr>
-                                </thead>
-
-                                <tbody>
-
-                                    @{
-                                        int y = 0;
-                                        // 8 is amount of dif types of doughnuts in inventory.
-                                        for (int x = 0; x < 8; x++)
-                                        {
-                                            InventoryOnHandModelByType type = new InventoryOnHandModelByType();
-
-                                            if (x < y)
-                                            {
-                                                foreach (InventoryOnHandModelByType inv in ViewBag.InvTotalsByType)
-                                                {
-                                                    type = inv;
-                                                    y++;
-                                                }
-                                            }
-                                            <tr>
-                                                <td id="nameOfType_@x">@type.NameOf</td>
-                                                <td id="batchTotalType_@x">@type.Total</td>
-                                            </tr>
-                                        }
-                                    }
 
 
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                    <div class="col-4-auto">
-                        <div class="container">
-                            <div class="card-header">
-                                expires next:
-                            </div>
-                            <table class="table table-sm table-dark table-hover table-striped table-bordered">
-                                <thead>
-                                    <tr>
-                                        <th scope="col">Batch ID</th>
-                                        <th scope="col">Name</th>
-                                        <th scope="col">Total</th>
-                                        <th scope="col">Expires</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @{
-                                        int b = 0;
-                                        // 8 is amount of dif types of doughnuts in inventory.
-                                        for (int x = 0; x < 8; x++)
-                                        {
-                                            InventoryOnHandModel batch = new InventoryOnHandModel();
 
-                                            if (x < b)
-                                            {
-                                                foreach (InventoryOnHandModel inv in ViewBag.ExpiresNext)
-                                                {
-                                                    batch = inv;
-                                                    b++;
-                                                }
-                                            }
-                                            <tr>
-                                                <td id="idOfBatch_Exp_@x">@batch.BatchId</td>
-                                                <td id="nameOf_Exp_@x">@batch.NameOf</td>
-                                                <td id="totalOf_Exp_@x">@batch.Total</td>
-                                                <td id="expOf_Exp_@x">@batch.Expiration</td>
-                                            </tr>
-
-                                        }
-                                    }
-                                </tbody>
-                            </table>
-
-                        </div>
-                    </div>
                 </div>
-            <div class="row justify-content-sm-center">
-                <button id="runBatchesSim" class="btn float-right">insert | get from sim</button>
+
+
+
+                <div class="col-2">
+
+
+
+                    <div class="container">
+                        <div class="card-header">
+                            totals:
+                        </div>
+                        <table class="table table-sm table-dark table-hover table-striped table-bordered">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Name</th>
+                                    <th scope="col">Total</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+
+                                @{
+                                    int y = 0;
+                                    // 8 is amount of dif types of doughnuts in inventory.
+                                    for (int x = 0; x < 8; x++)
+                                    {
+                                        InventoryOnHandModelByType type = new InventoryOnHandModelByType();
+
+                                        if (x < y)
+                                        {
+                                            foreach (InventoryOnHandModelByType inv in ViewBag.InvTotalsByType)
+                                            {
+                                                type = inv;
+                                                y++;
+                                            }
+                                        }
+                                        <tr>
+                                            <td id="nameOfType_@x">@type.NameOf</td>
+                                            <td id="batchTotalType_@x">@type.Total</td>
+                                        </tr>
+                                    }
+                                }
+
+
+                            </tbody>
+                        </table>
+                    </div>
+
+
+
+                </div>
+
+
+
+                <div class="col-4">
+
+
+
+                    <div class="container">
+                        <div class="card-header">
+                            expires next:
+                        </div>
+                        <table class="table table-sm table-dark table-hover table-striped table-bordered">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Batch ID</th>
+                                    <th scope="col">Name</th>
+                                    <th scope="col">Total</th>
+                                    <th scope="col">Expires</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @{
+                                    int b = 0;
+                                    // 8 is amount of dif types of doughnuts in inventory.
+                                    for (int x = 0; x < 8; x++)
+                                    {
+                                        InventoryOnHandModel batch = new InventoryOnHandModel();
+
+                                        if (x < b)
+                                        {
+                                            foreach (InventoryOnHandModel inv in ViewBag.ExpiresNext)
+                                            {
+                                                batch = inv;
+                                                b++;
+                                            }
+                                        }
+                                        <tr>
+                                            <td id="idOfBatch_Exp_@x">@batch.BatchId</td>
+                                            <td id="nameOf_Exp_@x">@batch.NameOf</td>
+                                            <td id="totalOf_Exp_@x">@batch.Total</td>
+                                            <td id="expOf_Exp_@x">@batch.Expiration</td>
+                                        </tr>
+
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+
+
+                </div>
+
+
+
+
             </div>
+
+
+
+
+
+
+        </div>
+
+
+
+
+
+
+        <div class="row justify-content-sm-center">
+            <button id="runBatchesSim" class="btn float-right">insert | get from sim</button>
         </div>
     <script type="text/javascript">
             $(function () {
@@ -162,14 +221,20 @@
                         dataType: 'json',
                         success: function (data) {
                             if (data.length > 0) {
-
+                               
                                 var parsedData = JSON.parse(data);
+
+                                if (parsedData.length > 50) {
+
+                                    document.getElementById("isMaxedOut").innerHTML = "more than 50 batches in progess!";
+
+                                }
 
                                 for (let i = 0; i < data.length; i++) {
                                     document.getElementById("idOf_" + i).innerHTML = parsedData[i].ID;
                                     document.getElementById("nameOf_" + i).innerHTML = parsedData[i].NameOf;
                                     document.getElementById("batchTotal_" + i).innerHTML = parsedData[i].Total;
-                                    document.getElementById("completion_" + i).innerHTML = parsedData[i].Completion;
+                                    document.getElementById("started_" + i).innerHTML = parsedData[i].Started;
                                 }
                             }
                             else {

@@ -9,9 +9,8 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test.Models
     {
         public int ID { get; set; }
         public string NameOf { get; set; }
+        public DateTime Started { get; set; }
         public int? Total { get; set; }
-        public DateTime? Started { get; set; }
-
         public BatchModel()
         {
         }

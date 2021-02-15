@@ -1,6 +1,8 @@
 ﻿using ControlVee.Port.InventoryManagement.DutShop.Test.Models;
 using System.Collections.Generic;
 using System;
+using System.Data.SqlClient;
+using System.Data;
 
 namespace ControlVee.Port.InventoryManagement.DutShop.Test
 {
@@ -13,9 +15,10 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test
         private readonly string onHandInventoryTable = "dbo.OnHandInventory";
         private readonly string salesTable = "dbo.Sales";
         private readonly string storedProc_SimulateBatches = "SimulateBatches";
-        private readonly string storedProc_GetInventoryTotalsByType = "GetOnHandInventoryTotals";
+        private readonly string storedProc_GetInventoryTotalsByType = "GetOnHandInventoryTotalsByType";
         private readonly string storedProc_GetExpiresNext = "GetInventoryTotals_Expire_MIN";
-        private readonly string storedProc_GetRecentBatches = "GetRecentBatches";
+        private readonly string storedProc_GetAllBatches = "GetAllBatches";
+        private readonly string storedProc_MoveFromBatchToOnHandInventory = "MoveFromBatchToOnHandInventory";
         private List<BatchModel> batches;
         private List<InventoryOnHandModel> inv;
         private BatchModel batch;
@@ -79,7 +82,45 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test
             return inv;
         }
 
-        public List<BatchModel> GetJustUpdatedBatchesFromDb()
+        public bool MoveFromBatchToInventoryOnHandDb(int batchId, string nameOf, int totalMade)
+        {
+            bool updated = false;
+
+            AssuredConnected();
+            using (System.Data.IDbCommand command = connection.CreateCommand())
+            {
+                string text = storedProc_MoveFromBatchToOnHandInventory;
+                command.CommandType = System.Data.CommandType.StoredProcedure;
+                // Add input parameter.
+                SqlParameter parameter = new SqlParameter();
+                parameter.ParameterName = "@batchId";
+                parameter.SqlDbType = SqlDbType.Int;
+                parameter.Direction = ParameterDirection.Input;
+                parameter.Value = batchId;
+                // Add input parameter.
+                SqlParameter parameterB = new SqlParameter();
+                parameter.ParameterName = "@nameOf";
+                parameter.SqlDbType = SqlDbType.NVarChar;
+                parameter.Direction = ParameterDirection.Input;
+                parameter.Value = nameOf;
+                // Add input parameter.
+                SqlParameter parameterC = new SqlParameter();
+                parameter.ParameterName = "@totalMade";
+                parameter.SqlDbType = SqlDbType.Int;
+                parameter.Direction = ParameterDirection.Input;
+                parameter.Value = totalMade;
+
+                using (System.Data.IDataReader reader = command.ExecuteReader())
+                {
+                    if (reader.RecordsAffected > 0)
+                        updated = true;
+                }
+            }
+
+            return updated;
+        }
+
+        public List<BatchModel> GetAllBatchesFromDb()
         {
             batches = new List<BatchModel>();
 
@@ -87,7 +128,7 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test
             AssuredConnected();
             using (System.Data.IDbCommand command = connection.CreateCommand())
             {
-                string text = storedProc_GetRecentBatches;
+                string text = storedProc_GetAllBatches;
                 command.CommandText = text;
                 command.CommandType = System.Data.CommandType.StoredProcedure;
 
@@ -185,7 +226,7 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test
             batch.ID = (int)reader["ID"];
             batch.NameOf = (string)reader["nameOf"];
             batch.Total = (int)reader["total"];
-            batch.Started = (DateTime)reader["completion"];
+            batch.Started = (DateTime)reader["started"];
 
             return batch;
         }

@@ -16,6 +16,7 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test.Controllers
     ///  TODO: S_Proc for dbo.Batches in progress to delete
     ///  after x-time to simulate completion.
     ///  TODO: 0 (zero) in S_Proc.
+    ///  TODO: Organize references to CSS and .JS.
     /// </summary>
     public class HomeController : Controller
     {
@@ -43,36 +44,38 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test.Controllers
 
                 context = new DataAccess(connection);
                 
-                batches = context.GetJustUpdatedBatchesFromDb();
+                batches = context.GetAllBatchesFromDb();
                 expiresNext = context.GetExpiresNextByBatchFromDb();
                 invTotalsByType = context.GetInventoryTotalsByType();
             };
 
             // TODO: Sort here or below methods?  BOTH?
-            ViewBag.NewestBatches = batches.OrderBy(b => b.Completion);
+            ViewBag.NewestBatches = batches.OrderBy(b => b.Started);
             ViewBag.ExpiresNext = expiresNext.OrderBy(b => b.Expiration);
             ViewBag.InvTotalsByType = invTotalsByType.OrderBy(b => b.NameOf);
 
             return View();
         }
-       
-       
 
-        // Change to past any time.
-        public IActionResult GetBatchesPastFiveMinutes()
+        [HttpPost]
+        public IActionResult MoveFromBatchToInventoryOnHand(int batchId, string nameOf, int totalMade)
         {
-            batches = new List<BatchModel>();
             using (var connection = new System.Data.SqlClient.SqlConnection())
             {
                 connection.ConnectionString = cstring;
 
                 context = new DataAccess(connection);
 
-                batches = context.GetJustUpdatedBatchesFromDb();
+                if (!context.MoveFromBatchToInventoryOnHandDb(batchId, nameOf, totalMade))
+                {
+                    throw new System.Exception("Move from batch to inventory failed.");
+                }
             };
 
-            return View("Index"); 
+            GetAllBatchesFromS_Proc();
+            return View("Index");
         }
+
 
         public IActionResult GetInventoryOnHandAll()
         {
@@ -90,8 +93,7 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test.Controllers
         }
 
         [HttpGet]
-        // TODO: Returns two obj from S_Proc.
-        public IActionResult GetMostRecentBatchesFromS_Proc()
+        public IActionResult GetAllBatchesFromS_Proc()
         {
             batches = new List<BatchModel>();
             using (var connection = new System.Data.SqlClient.SqlConnection())
@@ -100,10 +102,7 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test.Controllers
 
                 context = new DataAccess(connection);
 
-                if (context.RunStoredProcSim())
-                {
-                    batches = context.GetJustUpdatedBatchesFromDb();
-                }
+                batches = context.GetAllBatchesFromDb();
 
             };
 
