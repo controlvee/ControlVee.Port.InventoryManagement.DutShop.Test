@@ -15,22 +15,20 @@
     <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
 </head>
 <body>
-    <div class="container">
-            <div class="row">
-                <div class="col-12">
-
-                    <div class="col-4-auto float-left">
+    <div class="container-fluid">
+            <div class="row justify-content-sm-center">
+                    <div class="col-4-auto">
                         <div class="container">
                             <div class="card-header">
                                 newest batches:
                             </div>
-                            <table class="table table-sm table-dark table-hover table-striped">
+                            <table class="table table-sm table-dark table-hover table-striped table-bordered">
                                 <thead>
                                     <tr>
-                                        <th scope="col">ID</th>
-                                        <th scope="col">Name</th>
-                                        <th scope="col">Total</th>
-                                        <th scope="col">Completed</th>
+                                        <th @*class="col-lg-1"*@ scope="col">ID</th>
+                                        <th @*class="col-lg-9"*@ scope="col">Name</th>
+                                        <th @*class="col-lg-1"*@ scope="col">Total</th>
+                                        <th @*class="col-lg-1"*@ scope="col">Completed</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -51,10 +49,10 @@
                                                 }
                                             }
                                             <tr>
-                                                <td id="idOf_@x">@batch.ID</td>
-                                                <td id="nameOf_@x">@batch.NameOf</td>
-                                                <td id="batchTotal_@x">@batch.Total</td>
-                                                <td id="completion_@x">@batch.Completion</td>
+                                                <td @*class="col-md-1"*@ id="idOf_@x">@batch.ID</td>
+                                                <td @*class="col-md-9"*@ id="nameOf_@x">@batch.NameOf</td>
+                                                <td @*class="col-md-1"*@ id="batchTotal_@x">@batch.Total</td>
+                                                <td @*class="col-md-1"*@ id="completion_@x">@batch.Completion</td>
                                             </tr>
                                         }
                                     }
@@ -62,12 +60,12 @@
                             </table>
                         </div>
                     </div>
-                    <div class="col-3-auto float-left">
+                    <div class="col-4-auto">
                         <div class="container">
                             <div class="card-header">
                                 totals:
                             </div>
-                            <table class="table table-sm table-dark table-hover table-striped">
+                            <table class="table table-sm table-dark table-hover table-striped table-bordered">
                                 <thead>
                                     <tr>
                                         <th scope="col">Name</th>
@@ -104,12 +102,12 @@
                             </table>
                         </div>
                     </div>
-                    <div class="col-4-auto float-left">
+                    <div class="col-4-auto">
                         <div class="container">
                             <div class="card-header">
                                 expires next:
                             </div>
-                            <table class="table table-sm table-dark table-hover table-striped">
+                            <table class="table table-sm table-dark table-hover table-striped table-bordered">
                                 <thead>
                                     <tr>
                                         <th scope="col">Batch ID</th>
@@ -149,8 +147,7 @@
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="row">
+            <div class="row justify-content-sm-center">
                 <button id="runBatchesSim" class="btn float-right">insert | get from sim</button>
             </div>
         </div>
