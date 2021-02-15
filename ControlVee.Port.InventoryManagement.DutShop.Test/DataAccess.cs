@@ -15,6 +15,7 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test
         private readonly string onHandInventoryTable = "dbo.OnHandInventory";
         private readonly string salesTable = "dbo.Sales";
         private readonly string storedProc_SimulateBatches = "SimulateBatches";
+        private readonly string storedProc_CreateBatchRecord = "CreateBatchRecord";
         private readonly string storedProc_GetInventoryTotalsByType = "GetOnHandInventoryTotalsByType";
         private readonly string storedProc_GetExpiresNext = "GetInventoryTotals_Expire_MIN";
         private readonly string storedProc_GetAllBatches = "GetAllBatches";
@@ -89,7 +90,7 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test
             AssuredConnected();
             using (System.Data.IDbCommand command = connection.CreateCommand())
             {
-                string text = storedProc_MoveFromBatchToOnHandInventory;
+                command.CommandText = storedProc_MoveFromBatchToOnHandInventory;
                 command.CommandType = System.Data.CommandType.StoredProcedure;
                 // Add input parameter.
                 SqlParameter parameter = new SqlParameter();
@@ -120,11 +121,52 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test
             return updated;
         }
 
+        internal bool CreateBatchRecord(int batchId, string nameOf, int total)
+        {
+            bool updated = false;
+
+            AssuredConnected();
+            using (System.Data.IDbCommand command = connection.CreateCommand())
+            {
+                command.CommandText = storedProc_CreateBatchRecord;
+                command.CommandType = System.Data.CommandType.StoredProcedure;
+                // Add input parameter.
+                SqlParameter parameterBatchId = new SqlParameter();
+                parameterBatchId.ParameterName = "@batchId";
+                parameterBatchId.SqlDbType = SqlDbType.Int;
+                parameterBatchId.Direction = ParameterDirection.Input;
+                parameterBatchId.Value = batchId;
+                // Add input parameter.
+                SqlParameter parameterNameOf = new SqlParameter();
+                parameterNameOf.ParameterName = "@nameOf";
+                parameterNameOf.SqlDbType = SqlDbType.NVarChar;
+                parameterNameOf.Direction = ParameterDirection.Input;
+                parameterNameOf.Value = nameOf;
+                // Add input parameter.
+                SqlParameter parameterTotalMade = new SqlParameter();
+                parameterTotalMade.ParameterName = "@totalMade";
+                parameterTotalMade.SqlDbType = SqlDbType.Int;
+                parameterTotalMade.Direction = ParameterDirection.Input;
+                parameterTotalMade.Value = total;
+
+                command.Parameters.Add(parameterBatchId);
+                command.Parameters.Add(parameterNameOf);
+                command.Parameters.Add(parameterTotalMade);
+
+                using (System.Data.IDataReader reader = command.ExecuteReader())
+                {
+                    if (reader.RecordsAffected > 0)
+                        updated = true;
+                }
+            }
+
+            return updated;
+        }
+
         public List<BatchModel> GetAllBatchesFromDb()
         {
             batches = new List<BatchModel>();
 
-            // TODO: Change to S_Proc.
             AssuredConnected();
             using (System.Data.IDbCommand command = connection.CreateCommand())
             {

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Data;
 using Newtonsoft.Json;
+using System;
 
 namespace ControlVee.Port.InventoryManagement.DutShop.Test.Controllers
 {
@@ -17,6 +18,7 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test.Controllers
     ///  after x-time to simulate completion.
     ///  TODO: 0 (zero) in S_Proc.
     ///  TODO: Organize references to CSS and .JS.
+    ///  TODO: ONHandInventory table foreign key.
     /// </summary>
     public class HomeController : Controller
     {
@@ -55,6 +57,22 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test.Controllers
             ViewBag.InvTotalsByType = invTotalsByType.OrderBy(b => b.NameOf);
 
             return View();
+        }
+        
+
+        [HttpGet]
+        public IActionResult CreateBatchRecord()
+        {
+            batches = new List<BatchModel>();
+            using (var connection = new System.Data.SqlClient.SqlConnection())
+            {
+                connection.ConnectionString = cstring;
+
+                context = new DataAccess(connection);
+                context.CreateBatchRecord(999999, "testBatch", 50); 
+            };
+
+            return View("Index");
         }
 
         [HttpPost]
@@ -101,7 +119,7 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test.Controllers
                 connection.ConnectionString = cstring;
 
                 context = new DataAccess(connection);
-
+             
                 batches = context.GetAllBatchesFromDb();
 
             };
