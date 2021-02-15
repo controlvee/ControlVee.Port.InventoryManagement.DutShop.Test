@@ -8,3 +8,10 @@ body {
     width: auto;
 }
 
+.container {
+    margin: 4px;
+}
+
+.col-12 {
+    width: auto;
+}
