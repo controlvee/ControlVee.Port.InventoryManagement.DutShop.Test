@@ -18,7 +18,7 @@
         <div class="container">
             <div class="col">
                 <div class="card-header">
-                    newest batches:
+                    totals:
                     <button id="runBatchesSim" class="btn float-right">insert | get from sim</button>
                 </div>
                 <table class="table table-sm table-dark table-hover table-striped">
@@ -56,6 +56,9 @@
 
                     </tbody>
                 </table>
+                <div class="card-header">
+                    newest batches:
+                </div>
                 <table class="table table-sm table-dark table-hover table-striped">
                     <thead>
                         <tr>
@@ -121,7 +124,7 @@
                                     }
                                 }
                                 <tr>
-                                     <td id="idOfBatch_Exp_@x">@batch.BatchId</td>
+                                    <td id="idOfBatch_Exp_@x">@batch.BatchId</td>
                                     <td id="nameOf_Exp_@x">@batch.NameOf</td>
                                     <td id="totalOf_Exp_@x">@batch.Total</td>
                                     <td id="expOf_Exp_@x">@batch.Expiration</td>
