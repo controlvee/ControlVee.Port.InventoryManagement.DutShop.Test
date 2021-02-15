@@ -121,7 +121,7 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test
             return updated;
         }
 
-        internal bool CreateBatchRecord(int batchId, string nameOf, int total)
+        internal bool CreateBatchRecord(string nameOf, int total)
         {
             bool updated = false;
 
@@ -130,12 +130,6 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test
             {
                 command.CommandText = storedProc_CreateBatchRecord;
                 command.CommandType = System.Data.CommandType.StoredProcedure;
-                // Add input parameter.
-                SqlParameter parameterBatchId = new SqlParameter();
-                parameterBatchId.ParameterName = "@batchId";
-                parameterBatchId.SqlDbType = SqlDbType.Int;
-                parameterBatchId.Direction = ParameterDirection.Input;
-                parameterBatchId.Value = batchId;
                 // Add input parameter.
                 SqlParameter parameterNameOf = new SqlParameter();
                 parameterNameOf.ParameterName = "@nameOf";
@@ -149,7 +143,6 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test
                 parameterTotalMade.Direction = ParameterDirection.Input;
                 parameterTotalMade.Value = total;
 
-                command.Parameters.Add(parameterBatchId);
                 command.Parameters.Add(parameterNameOf);
                 command.Parameters.Add(parameterTotalMade);
 

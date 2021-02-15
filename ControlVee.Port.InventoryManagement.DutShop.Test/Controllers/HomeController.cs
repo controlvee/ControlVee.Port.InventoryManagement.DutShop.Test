@@ -19,6 +19,7 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test.Controllers
     ///  TODO: 0 (zero) in S_Proc.
     ///  TODO: Organize references to CSS and .JS.
     ///  TODO: ONHandInventory table foreign key.
+    ///  TODO: Handle user input create batch for null or bad values.
     /// </summary>
     public class HomeController : Controller
     {
@@ -61,14 +62,17 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test.Controllers
         
 
         [HttpPost]
-        public IActionResult CreateBatchRecord(BatchModel batchRecord)
+        public IActionResult CreateBatchRecord(string data)
         {
+            string nameOf = data;
+            int total = 0;
+
             using (var connection = new System.Data.SqlClient.SqlConnection())
             {
                 connection.ConnectionString = cstring;
 
                 context = new DataAccess(connection);
-                context.CreateBatchRecord(batchRecord.ID, batchRecord.NameOf, batchRecord.Total); 
+                context.CreateBatchRecord(nameOf, total); 
             };
 
             return View("Index");
