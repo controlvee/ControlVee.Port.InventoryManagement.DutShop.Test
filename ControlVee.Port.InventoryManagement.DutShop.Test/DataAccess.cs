@@ -15,6 +15,7 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test
         private readonly string storedProc_SimulateBatches = "SimulateBatches";
         private readonly string storedProc_GetInventoryTotalsByType = "GetOnHandInventoryTotals";
         private readonly string storedProc_GetExpiresNext = "GetInventoryTotals_Expire_MIN";
+        private readonly string storedProc_GetRecentBatches = "GetRecentBatches";
         private List<BatchModel> batches;
         private List<InventoryOnHandModel> inv;
         private BatchModel batch;
@@ -86,9 +87,9 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test
             AssuredConnected();
             using (System.Data.IDbCommand command = connection.CreateCommand())
             {
-                string text = $"SELECT TOP 10 * FROM {dbName}.{batchesTable} ORDER BY completion DESC";
+                string text = storedProc_GetRecentBatches;
                 command.CommandText = text;
-                command.CommandType = System.Data.CommandType.Text;
+                command.CommandType = System.Data.CommandType.StoredProcedure;
 
                 using (System.Data.IDataReader reader = command.ExecuteReader())
                 {
@@ -184,8 +185,7 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test
             batch.ID = (int)reader["ID"];
             batch.NameOf = (string)reader["nameOf"];
             batch.Total = (int)reader["total"];
-            batch.Completion = (DateTime)reader["completion"];
-            batch.Expiration = (DateTime)reader["expire"];
+            batch.Started = (DateTime)reader["completion"];
 
             return batch;
         }
