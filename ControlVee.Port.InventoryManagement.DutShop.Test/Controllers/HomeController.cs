@@ -60,16 +60,15 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test.Controllers
         }
         
 
-        [HttpGet]
-        public IActionResult CreateBatchRecord()
+        [HttpPost]
+        public IActionResult CreateBatchRecord(BatchModel batchRecord)
         {
-            batches = new List<BatchModel>();
             using (var connection = new System.Data.SqlClient.SqlConnection())
             {
                 connection.ConnectionString = cstring;
 
                 context = new DataAccess(connection);
-                context.CreateBatchRecord(999999, "testBatch", 50); 
+                context.CreateBatchRecord(batchRecord.ID, batchRecord.NameOf, batchRecord.Total); 
             };
 
             return View("Index");
