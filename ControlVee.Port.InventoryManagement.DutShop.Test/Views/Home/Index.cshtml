@@ -60,14 +60,14 @@
                                         a++;
                                     }
                                 }
-                                <li class="list-group-item">
-                                    <div>
+                                <li id="batchItem" class="list-group-item">
                                         <div class="form-check form-switch float-left">
-                                            <input class="form-check-input" type="checkbox" id="flexSwitchCompleted">
+                                            <input class="form-check-input" type="checkbox" id="flexSwitchCompleted" onclick="moveFromBatchToInventory()">
+                                            <div class="form-text float-left" id="idOf_@x">@batch.ID</div>
                                         </div>
-                                    </div>
 
-                                    <div class="form-text float-left" id="idOf_@x">@batch.ID</div>
+                                    @*Change ID names to have more meaning.*@
+                                    
                                     <div id="nameOf_@x">@batch.NameOf</div>
 
 
@@ -112,7 +112,7 @@
 
 
                 <div class="row justify-content-sm-center">
-                    <button id="createBatch" class="btn float-right"  onclick="createBatch()">create batch</button>
+                    <button id="createBatch" class="btn float-right" onclick="createBatch()">create batch</button>
                 </div>
 
 
@@ -247,6 +247,30 @@
     </div>
 
     <script type="text/javascript">
+         function moveFromBatchToInventory()  {
+
+             var idOfBatch = event.target.parentElement.children[1].innerHTML;
+
+                            $.ajax({
+                                type: 'POST',
+                                url: '/Home/MoveFromBatchToInventoryOnHand',
+                                dataType: 'json',
+                                data: "data=" + JSON.stringify({ id: idOfBatch, nameOf: "", total: 0 }),
+                                success: function () {
+                                    alert("moved from batches to inv")
+                                 
+                                    updateInfo();
+                                    
+                                    // Inventory select all.
+                                },
+                                error: function () { alert("FAIL ON MOVE TO INV") }
+
+                            });
+
+
+
+    };
+
          function createBatch()  {
 
                             var nameOf = document.getElementById("nameOfDoughnutBatch").value;
@@ -259,106 +283,101 @@
                                 type: 'POST',
                                 url: '/Home/CreateBatchRecord',
                                 dataType: 'json',
-                                data: "data=" + JSON.stringify({ nameOf: nameOf, total: total }),
+                                data: "data=" + JSON.stringify({ id: 0, nameOf: nameOf, total: total }),
                                 success: function () {
-                                    alert("right before getallbatches call")
-                                    getAllBatches();
+                                    alert("created batch")
+                                    updateInfo();
                                 },
-                                error: alert("FAIL")
+                                error: function () { alert("FAIL ON CREATE BATCH") }
 
                             });
 
-                                
-                        
+
+
                     };
 
-        function getAllBatches() {
+    
 
-            $.ajax({
-                url: '/Home/GetAllBatchesFromS_Proc',
-                type: 'GET',
-                dataType: 'json',
-                success: function (data) {
-                    alert("inside getallbatches function")
-                    if (data.length > 0) {
+        function updateInfo () {
 
-                        var parsedData = JSON.parse(data);
+                    // Get all batches.
+                    $.ajax({
+                        url: '/Home/GetAllBatchesFromS_Proc',
+                        type: 'GET',
+                        dataType: 'json',
+                        success: function (data) {
+                            if (data.length > 0) {
+                                
+                                var parsedData = JSON.parse(data);
 
-                        if (parsedData.length > 50) {
+                                if (parsedData.length > 50) {
 
-                            document.getElementById("isMaxedOut").innerHTML = "more than 100 batches in progress!";
+                                    document.getElementById("isMaxedOut").innerHTML = "more than 100 batches in progress!";
 
-                        }
-
-                        for (let i = 0; i < data.length; i++) {
-                            document.getElementById("idOf_" + i).innerHTML = parsedData[i].ID;
-                            document.getElementById("nameOf_" + i).innerHTML = parsedData[i].NameOf;
-                            document.getElementById("batchTotal_" + i).innerHTML = parsedData[i].Total;
-                            document.getElementById("started_" + i).innerHTML = parsedData[i].Started;
-                        }
-                    }
-                    else {
-                        alert("FAILED");
-                    }
-                }
-            });
-
-
-
-
-        };
-
-
-        $(function () {
-                    $("#getBatches").click(function () {
-
-
-
-                        // Update expires next.
-                        $.ajax({
-                            url: '/Home/GetExpiresNext',
-                            type: 'GET',
-                            dataType: 'json',
-                            success: function (data) {
-                                if (data.length > 0) {
-
-                                    var parsedData = JSON.parse(data);
-
-                                    for (let i = 0; i < data.length; i++) {
-                                        document.getElementById("idOfBatch_Exp_" + i).innerHTML = parsedData[i].BatchId;
-                                        document.getElementById("nameOf_Exp_" + i).innerHTML = parsedData[i].NameOf;
-                                        document.getElementById("totalOf_Exp_" + i).innerHTML = parsedData[i].Total;
-                                        document.getElementById("expOf_Exp_" + i).innerHTML = parsedData[i].Expiration;
-                                    }
                                 }
-                                else {
-                                    alert("FAILED");
+
+                                for (let i = 0; i < data.length; i++) {
+                                    document.getElementById("idOf_" + i).innerHTML = parsedData[i].ID;
+                                    document.getElementById("nameOf_" + i).innerHTML = parsedData[i].NameOf;
+                                    document.getElementById("batchTotal_" + i).innerHTML = parsedData[i].Total;
+                                    document.getElementById("started_" + i).innerHTML = parsedData[i].Started;
                                 }
+                                alert("got batches")
                             }
-                        });
-
-                        // Update totals by type.
-                        $.ajax({
-                            url: '/Home/GetInventoryOnHandAllByType',
-                            type: 'GET',
-                            dataType: 'json',
-                            success: function (data) {
-                                if (data.length > 0) {
-
-                                    var parsedData = JSON.parse(data);
-
-                                    for (let i = 0; i < data.length; i++) {
-                                        document.getElementById("nameOfType_" + i).innerHTML = parsedData[i].NameOf;
-                                        document.getElementById("batchTotalType_" + i).innerHTML = parsedData[i].Total;
-                                    }
-                                }
-                                else {
-                                    alert("FAILED");
-                                }
+                            else {
+                                alert("FAILED");
                             }
-                        });
-                    })
-                });
+                        }
+                    });
+
+                    // Update expires next.
+                    $.ajax({
+                        url: '/Home/GetExpiresNext',
+                        type: 'GET',
+                        dataType: 'json',
+                        success: function (data) {
+                            if (data.length > 0) {
+
+                                var parsedData = JSON.parse(data);
+
+                                for (let i = 0; i < data.length; i++) {
+                                    document.getElementById("idOfBatch_Exp_" + i).innerHTML = parsedData[i].BatchId;
+                                    document.getElementById("nameOf_Exp_" + i).innerHTML = parsedData[i].NameOf;
+                                    document.getElementById("totalOf_Exp_" + i).innerHTML = parsedData[i].Total;
+                                    document.getElementById("expOf_Exp_" + i).innerHTML = parsedData[i].Expiration;
+                                }
+
+                                alert("got expires next")
+                            }
+                            else {
+                                alert("FAILED");
+                            }
+                        }
+                    });
+
+                    // Get totals by type.
+                    $.ajax({
+                        url: '/Home/GetInventoryOnHandAllByType',
+                        type: 'GET',
+                        dataType: 'json',
+                        success: function (data) {
+                            if (data.length > 0) {
+
+                                var parsedData = JSON.parse(data);
+
+                                for (let i = 0; i < data.length; i++) {
+                                    document.getElementById("nameOfType_" + i).innerHTML = parsedData[i].NameOf;
+                                    document.getElementById("batchTotalType_" + i).innerHTML = parsedData[i].Total;
+                                }
+
+                                alert("got totals by type")
+                            }
+                            else {
+                                alert("FAILED");
+                            }
+                        }
+                    });
+                };
     </script>
 </body>
 </html>

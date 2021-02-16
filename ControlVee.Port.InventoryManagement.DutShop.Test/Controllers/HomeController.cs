@@ -20,6 +20,7 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test.Controllers
     ///  TODO: Organize references to CSS and .JS.
     ///  TODO: ONHandInventory table foreign key.
     ///  TODO: Handle user input create batch for null or bad values.
+    ///  TODO: Disable input on index load with no data.
     /// </summary>
     public class HomeController : Controller
     {
@@ -80,23 +81,24 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test.Controllers
         }
 
         [HttpPost]
-        public IActionResult MoveFromBatchToInventoryOnHand(int batchId, string nameOf, int totalMade)
+        public IActionResult MoveFromBatchToInventoryOnHand(string data)
         {
+            var createBatchModel = JsonConvert.DeserializeObject<CreateBatchModel>(data);
+
             using (var connection = new System.Data.SqlClient.SqlConnection())
             {
                 connection.ConnectionString = cstring;
 
                 context = new DataAccess(connection);
 
-                if (!context.MoveFromBatchToInventoryOnHandDb(batchId, nameOf, totalMade))
+                if (!context.MoveFromBatchToInventoryOnHandDb(createBatchModel.ID))
                 {
                     // Return to ajax call.
                     throw new System.Exception("Move from batch to inventory failed.");
                 }
             };
 
-            GetAllBatchesFromS_Proc();
-            return View("Index");
+            return Json(JsonConvert.SerializeObject("{ message: \"OK200\" }"));
         }
 
 

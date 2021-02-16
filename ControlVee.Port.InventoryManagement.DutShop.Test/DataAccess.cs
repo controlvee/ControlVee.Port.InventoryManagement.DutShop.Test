@@ -83,7 +83,7 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test
             return inv;
         }
 
-        public bool MoveFromBatchToInventoryOnHandDb(int batchId, string nameOf, int totalMade)
+        public bool MoveFromBatchToInventoryOnHandDb(int batchId)
         {
             bool updated = false;
 
@@ -93,23 +93,13 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test
                 command.CommandText = storedProc_MoveFromBatchToOnHandInventory;
                 command.CommandType = System.Data.CommandType.StoredProcedure;
                 // Add input parameter.
-                SqlParameter parameter = new SqlParameter();
-                parameter.ParameterName = "@batchId";
-                parameter.SqlDbType = SqlDbType.Int;
-                parameter.Direction = ParameterDirection.Input;
-                parameter.Value = batchId;
-                // Add input parameter.
-                SqlParameter parameterB = new SqlParameter();
-                parameter.ParameterName = "@nameOf";
-                parameter.SqlDbType = SqlDbType.NVarChar;
-                parameter.Direction = ParameterDirection.Input;
-                parameter.Value = nameOf;
-                // Add input parameter.
-                SqlParameter parameterC = new SqlParameter();
-                parameter.ParameterName = "@totalMade";
-                parameter.SqlDbType = SqlDbType.Int;
-                parameter.Direction = ParameterDirection.Input;
-                parameter.Value = totalMade;
+                SqlParameter parameterBatchId = new SqlParameter();
+                parameterBatchId.ParameterName = "@batchId";
+                parameterBatchId.SqlDbType = SqlDbType.Int;
+                parameterBatchId.Direction = ParameterDirection.Input;
+                parameterBatchId.Value = batchId;
+
+                command.Parameters.Add(parameterBatchId);
 
                 using (System.Data.IDataReader reader = command.ExecuteReader())
                 {
@@ -121,7 +111,7 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test
             return updated;
         }
 
-        internal bool CreateBatchRecordFromDb(string nameOf, int total)
+        internal bool CreateBatchRecordFromDb(string nameOf, int? total)
         {
             bool updated = false;
 
