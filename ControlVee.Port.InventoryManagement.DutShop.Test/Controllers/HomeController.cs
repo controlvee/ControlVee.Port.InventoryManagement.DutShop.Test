@@ -72,10 +72,6 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test.Controllers
 
 
             };
-            //// TODO: Sort here or below methods?  BOTH?
-            //ViewBag.NewestBatches = batches.OrderBy(b => b.Started);
-            //ViewBag.ExpiresNext = expiresNext.OrderBy(b => b.Expiration);
-            //ViewBag.InvTotalsByType = invTotalsByType.OrderBy(b => b.NameOf);
 
             return View(masterModel);
         }
@@ -105,7 +101,7 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test.Controllers
 
             };
 
-            return Json(JsonConvert.SerializeObject("{ message: \"OK200\" }"));
+            return Json(JsonConvert.SerializeObject("{ message: \"200\" }"));
         }
 
         [HttpPost]
@@ -129,7 +125,7 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test.Controllers
             };
 
 
-            return Json(JsonConvert.SerializeObject("{ message: \"OK200\" }"));
+            return Json(JsonConvert.SerializeObject("{ message: \"200\" }"));
         }
 
 
@@ -150,6 +146,7 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test.Controllers
         }
 
         [HttpGet]
+        // TODO: Return partial view?
         public IActionResult GetAllBatches()
         {
             batches = new List<BatchModel>();
@@ -164,9 +161,7 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test.Controllers
                 masterModel.BatchModels = batches;
             };
 
-            JsonSerializerSettings jset = new JsonSerializerSettings();
-
-              return Json(JsonConvert.SerializeObject(batches));
+            return View("Index", masterModel);
         }
 
         [HttpGet]
