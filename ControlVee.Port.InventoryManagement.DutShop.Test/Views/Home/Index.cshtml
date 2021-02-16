@@ -42,7 +42,7 @@
                     <div class="card-header">
                         newest batches: <span id="isMaxedOut" class="red"></span>
                     </div>
-                    <ul class="list-group list-unstyled flex-fill pre-scrollable">
+                    <ul class="list-group-horizontal list-unstyled flex-fill pre-scrollable">
 
                         @{
 
@@ -50,7 +50,7 @@
                             foreach (BatchModel inv in Model.BatchModels)
                             {
 
-                                <li id="batchItem" class="list-group-item">
+                                <li id="batchItem" class="list-group-item border">
                                     <div id="flexSwitchCompleted" class="form-check form-switch float-left">
                                         <input class="form-check-input" type="checkbox" onclick="$('#moveBatchAlert_@k').show()">
                                         <div class="form-text float-left" id="idOf_@k">@inv.ID</div>
@@ -132,7 +132,7 @@
                                         var t = JSON.stringify(parsedData);
                                         console.log(t);
 
-                                        for (let i = 0; i < (parsedData.length); i++) {
+                                        for (let i = 0; i < (t.length); i++) {
                                             console.log(parsedData[i]['ID']);
                                             console.log(parsedData[i]['NameOf']);
                                             console.log(parsedData[i]['Started']);
@@ -188,7 +188,7 @@
 
 
             <!-- #region isolate -->
-            @*<div class="col-2">
+            <div class="col-2">
 
 
 
@@ -271,7 +271,7 @@
 
 
 
-        </div>*@
+        </div>
 
 
             <!-- #endregion -->
@@ -329,54 +329,58 @@
 
             getAllBatches();
 
-                //    // Update expires next.
-                //    $.ajax({
-                //        url: '/Home/GetExpiresNext',
-                //        type: 'GET',
-                //        dataType: 'json',
-                //        success: function (data) {
-                //            if (data.length > 0) {
-                //                console.log("getting expires next");
-                //                var parsedData = JSON.parse(data);
+                    // Update expires next.
+                    $.ajax({
+                        url: '/Home/GetExpiresNext',
+                        type: 'GET',
+                        dataType: 'json',
+                        success: function (data) {
+                            if (data.length > 0) {
+                                console.log("getting expires next");
+                                var parsedData = JSON.parse(data);
+                                var t = JSON.stringify(parsedData);
+                                console.log(t);
 
-                //                for (let i = 0; i < data.length; i++) {
-                //                    document.getElementById("idOfBatch_Exp_" + i).innerHTML = parsedData[i].BatchId;
-                //                    document.getElementById("nameOf_Exp_" + i).innerHTML = parsedData[i].NameOf;
-                //                    document.getElementById("totalOf_Exp_" + i).innerHTML = parsedData[i].Total;
-                //                    document.getElementById("expOf_Exp_" + i).innerHTML = parsedData[i].Expiration;
-                //                }
+                                for (let i = 0; i < t.length; i++) {
+                                    document.getElementById("idOfBatch_Exp_" + i).innerHTML = parsedData[i]['ID'];
+                                    document.getElementById("nameOf_Exp_" + i).innerHTML = parsedData[i]['NameOf'];
+                                    document.getElementById("totalOf_Exp_" + i).innerHTML = parsedData[i]['Total'];
+                                    document.getElementById("expOf_Exp_" + i).innerHTML = parsedData[i]['Expiration'];
+                                }
 
-                //                console.log("got expires next");
-                //            }
-                //            else {
-                //                console.log("FAILED");
-                //            }
-                //        }
-                //    });
+                                console.log("got expires next");
+                            }
+                            else {
+                                console.log("FAILED");
+                            }
+                        }
+                    });
 
-                //    // Get totals by type.
-                //    $.ajax({
-                //        url: '/Home/GetInventoryOnHandAllByType',
-                //        type: 'GET',
-                //        dataType: 'json',
-                //        success: function (data) {
-                //            if (data.length > 0) {
-                //                console.log("gettig on hand by type");
-                //                var parsedData = JSON.parse(data);
+                    // Get totals by type.
+                    $.ajax({
+                        url: '/Home/GetInventoryOnHandAllByType',
+                        type: 'GET',
+                        dataType: 'json',
+                        success: function (data) {
+                            if (data.length > 0) {
+                                console.log("gettig on hand by type");
+                                var parsedData = JSON.parse(data);
+                                var t = JSON.stringify(parsedData);
+                                console.log(t);
 
-                //                for (let i = 0; i < data.length; i++) {
-                //                    document.getElementById("nameOfType_" + i).innerHTML = parsedData[i].NameOf;
-                //                    document.getElementById("batchTotalType_" + i).innerHTML = parsedData[i].Total;
-                //                }
+                                for (let i = 0; i < data.length; i++) {
+                                    document.getElementById("nameOfType_" + i).innerHTML = parsedData[i]['NameOf'];
+                                    document.getElementById("batchTotalType_" + i).innerHTML = parsedData[i]['Total'];
+                                }
 
-                //                console.log("got totals by type");
-                //            }
-                //            else {
-                //                console.log("FAILED");
-                //            }
-                //        }
-                //    });
-                //};
+                                console.log("got totals by type");
+                            }
+                            else {
+                                console.log("FAILED");
+                            }
+                        }
+                    });
+                };
     </script>
 </body>
 </html>

@@ -6,34 +6,11 @@
 body {
 }
 
-
-.custom-scrollbar {
-    overflow: auto;
-    height: 300px;
-    overflow-x: hidden;
+.list-group-item {
+    margin: 10px;
 }
 
-.table-wrapper-scroll-y {
-    display: block;
-}
-
-.row-btn-cmplt {
-    background-color:#808080;
-    margin-top:0px;
-}
-
-li {
-    margin:10px;
-}
-
-.list-group-item:nth-child(even) {
-    background-color:#808080;
-}
 
 .list-group {
     height: 500px;
-}
-
-.red {
-    color: #f38b76;
 }

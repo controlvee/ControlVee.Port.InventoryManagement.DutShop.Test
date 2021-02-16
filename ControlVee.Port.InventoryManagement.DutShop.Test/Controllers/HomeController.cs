@@ -121,11 +121,14 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test.Controllers
                     throw new System.Exception("Move from batch to inventory failed.");
                 }
 
+                // Why is model null here?
+                var batchModelwithId = masterModel.BatchModels.First(i => i.ID == createBatchModel.ID);
+                masterModel.BatchModels.Remove(batchModelwithId);
                
             };
 
 
-            return Json(JsonConvert.SerializeObject("{ message: \"200\" }"));
+            return View("Index");
         }
 
 
@@ -161,7 +164,7 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test.Controllers
                 masterModel.BatchModels = batches;
             };
 
-            return View("Index", masterModel);
+            return Json(JsonConvert.SerializeObject(batches));
         }
 
         [HttpGet]
