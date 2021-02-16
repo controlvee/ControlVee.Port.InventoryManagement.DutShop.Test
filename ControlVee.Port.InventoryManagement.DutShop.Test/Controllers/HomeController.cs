@@ -122,13 +122,15 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test.Controllers
                 }
 
                 // Why is model null here?
-                var batchModelwithId = masterModel.BatchModels.First(i => i.ID == createBatchModel.ID);
-                masterModel.BatchModels.Remove(batchModelwithId);
-               
+                //var batchModelwithId = masterModel.BatchModels.First(i => i.ID == createBatchModel.ID);
+                //masterModel.BatchModels.Remove(batchModelwithId);
+
+                batches = context.GetAllBatchesFromDb();
+
             };
+            
 
-
-            return View("Index");
+            return View("Index", batches);
         }
 
 
