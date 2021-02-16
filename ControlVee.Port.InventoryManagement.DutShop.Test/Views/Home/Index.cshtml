@@ -1,6 +1,9 @@
 ﻿@{
     ViewData["Title"] = "Home Page";
 }
+
+@model ControlVee.Port.InventoryManagement.DutShop.Test.Models.MasterModel
+
 <html>
 <head>
     <meta charset="utf-8" />
@@ -35,51 +38,53 @@
             <div class="col-6">
 
 
-
                 <div class="container">
                     <div class="card-header">
-                        newest batches (qty 100): <span id="isMaxedOut" class="red"></span>
+                        newest batches: <span id="isMaxedOut" class="red"></span>
                     </div>
                     <ul class="list-group list-unstyled flex-fill pre-scrollable">
 
                         @{
-                            int a = 0;
-                            // 100 is amount of batches in progress (max).
-                            // TODO: Why doesn't this work but Ln 57 works?
-                            //int count = ((List<BatchModel>)ViewBag.NewestBatches).Count();
-                            int count = 100;
-                            for (int x = 0; x < count; x++)
-                            {
-                                BatchModel batch = new BatchModel();
 
-                                if (x < a)
-                                {
-                                    foreach (BatchModel inv in ViewBag.NewestBatches)
-                                    {
-                                        batch = inv;
-                                        a++;
-                                    }
-                                }
+                            int k = 0;
+                            foreach (BatchModel inv in Model.BatchModels)
+                            {
+
                                 <li id="batchItem" class="list-group-item">
-                                        <div class="form-check form-switch float-left">
-                                            <input class="form-check-input" type="checkbox" id="flexSwitchCompleted" onclick="moveFromBatchToInventory()">
-                                            <div class="form-text float-left" id="idOf_@x">@batch.ID</div>
+                                    <div id="flexSwitchCompleted" class="form-check form-switch float-left">
+                                        <input class="form-check-input" type="checkbox" onclick="$('#moveBatchAlert_@k').show()">
+                                        <div class="form-text float-left" id="idOf_@k">@inv.ID</div>
+                                        <div id="moveBatchAlert_@k" class="alert alert-primary collapse" role="alert">
+                                            <div id="alert_idOf_@k">
+                                                <div class="pre">
+                                                    do you want to move to inventory?
+                                                </div>
+                                                <div id="batchIdInsideRecord">
+                                                    @inv.ID
+                                                </div>
+
+
+
+                                                <button type="button" class="btn btn-secondary">no</button>
+                                                <button id="saveButton_@k" type="button" class="btn btn-primary" onclick="moveFromBatchToInventory()">yes</button>
+                                            </div>
+
                                         </div>
+                                    </div>
 
                                     @*Change ID names to have more meaning.*@
-                                    
-                                    <div id="nameOf_@x">@batch.NameOf</div>
+
+                                    <div id="nameOf_@k">@inv.NameOf</div>
 
 
                                     <div>
-                                        <span class="badge bg-primary rounded-pill float-right" id="batchTotal_@x">@batch.Total</span>
+                                        <span class="badge bg-primary rounded-pill float-right" id="batchTotal_@k">@inv.Total</span>
                                     </div>
 
-                                    <div id="started_@x">@batch.Started</div>
+                                    <div id="started_@k">@inv.Started</div>
 
                                 </li>
-
-
+                                k++;
 
                             }
                         }
@@ -112,6 +117,67 @@
 
 
                 <div class="row justify-content-sm-center">
+                    <script type="text/javascript">
+                        function getAllBatches() {
+                            // Get all batches.
+                            $.ajax({
+                                url: '/Home/GetAllBatches',
+                                type: 'GET',
+                                dataType: 'json',
+                                success: function (data) {
+                                    if (data.length > 0) {
+                                        console.log("getting all batchess");
+                                        console.log(data);
+                                        var parsedData = JSON.parse(data);
+                                        var t = JSON.stringify(parsedData);
+                                        console.log(t);
+
+                                        for (let i = 0; i < (parsedData.length); i++) {
+                                            console.log(parsedData[i]['ID']);
+                                            console.log(parsedData[i]['NameOf']);
+                                            console.log(parsedData[i]['Started']);
+                                            console.log(parsedData[i]['Total']);
+                                            document.getElementById("idOf_" + i).innerHTML = parsedData[i]['ID'];
+                                            document.getElementById("nameOf_" + i).innerHTML = parsedData[i]['NameOf'];
+                                            document.getElementById("started_" + i).innerHTML = parsedData[i]['Started'];
+                                            document.getElementById("batchTotal_" + i).innerHTML = parsedData[i]['Total'];
+                                        }
+                                        console.log(parsedData.length);
+                                        console.log("got batches");
+                                    }
+                                },
+                                error: function (e) {
+                                    console.log(e);
+                                    }
+
+                                });
+                        }
+                    function createBatch() {
+
+                        var nameOf = document.getElementById("nameOfDoughnutBatch").value;
+                        var total = document.getElementById("quantityOfBatch").value;
+
+
+
+                        @* stackoverflow.com / questions / 25050240 / ajax - post - parameter - is - always - null -in -mvc - app *@
+                        $.ajax({
+                            type: 'POST',
+                            url: '/Home/CreateBatchRecord',
+                            dataType: 'json',
+                            data: "data=" + JSON.stringify({ id: 0, nameOf: nameOf, total: total }),
+                            success: function () {
+                                console.log("created batch");
+                                getAllBatches();
+                            },
+                            error: function () { console.log("FAIL ON CREATE BATCH"); }
+
+                        });
+
+
+
+                    };
+
+                    </script>
                     <button id="createBatch" class="btn float-right" onclick="createBatch()">create batch</button>
                 </div>
 
@@ -121,108 +187,94 @@
             </div>
 
 
-
-            <div class="col-2">
-
-
-
-                <div class="container">
-                    <div class="card-header">
-                        totals:
-                    </div>
-                    <table class="table table-sm table-dark table-hover table-striped table-bordered">
-                        <thead>
-                            <tr>
-                                <th scope="col">Name</th>
-                                <th scope="col">Total</th>
-                            </tr>
-                        </thead>
-
-                        <tbody>
-
-                            @{
-                                int y = 0;
-                                // 8 is amount of dif types of doughnuts in inventory.
-                                for (int x = 0; x < 8; x++)
-                                {
-                                    InventoryOnHandModelByType type = new InventoryOnHandModelByType();
-
-                                    if (x < y)
-                                    {
-                                        foreach (InventoryOnHandModelByType inv in ViewBag.InvTotalsByType)
-                                        {
-                                            type = inv;
-                                            y++;
-                                        }
-                                    }
-                                    <tr>
-                                        <td id="nameOfType_@x">@type.NameOf</td>
-                                        <td id="batchTotalType_@x">@type.Total</td>
-                                    </tr>
-                                }
-                            }
+            <!-- #region isolate -->
+            @*<div class="col-2">
 
 
-                        </tbody>
-                    </table>
+
+            <div class="container">
+                <div class="card-header">
+                    totals:
                 </div>
+                <table class="table table-sm table-dark table-hover table-striped table-bordered">
+                    <thead>
+                        <tr>
+                            <th scope="col">Name</th>
+                            <th scope="col">Total</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        @{
+                            int y = 0;
+                            // 8 is amount of dif types of doughnuts in inventory.
+                            foreach (InventoryOnHandModelByType inv in Model.InventoryOnHandByTypeModel)
+                            {
 
 
+                                <tr>
+                                    <td id="nameOfType_@y">@inv.NameOf</td>
+                                    <td id="batchTotalType_@y">@inv.Total</td>
+                                </tr>
 
+                                y++;
+                            }
+                        }
+
+
+                    </tbody>
+                </table>
             </div>
 
 
 
-            <div class="col-4">
+        </div>
 
 
 
-                <div class="container">
-                    <div class="card-header">
-                        expires next:
-                    </div>
-                    <table class="table table-sm table-dark table-hover table-striped table-bordered">
-                        <thead>
-                            <tr>
-                                <th scope="col">Batch ID</th>
-                                <th scope="col">Name</th>
-                                <th scope="col">Total</th>
-                                <th scope="col">Expires</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @{
-                                int b = 0;
-                                // 8 is amount of dif types of doughnuts in inventory.
-                                for (int x = 0; x < 8; x++)
-                                {
-                                    InventoryOnHandModel batch = new InventoryOnHandModel();
+        <div class="col-4">
 
-                                    if (x < b)
-                                    {
-                                        foreach (InventoryOnHandModel inv in ViewBag.ExpiresNext)
-                                        {
-                                            batch = inv;
-                                            b++;
-                                        }
-                                    }
-                                    <tr>
-                                        <td id="idOfBatch_Exp_@x">@batch.BatchId</td>
-                                        <td id="nameOf_Exp_@x">@batch.NameOf</td>
-                                        <td id="totalOf_Exp_@x">@batch.Total</td>
-                                        <td id="expOf_Exp_@x">@batch.Expiration</td>
-                                    </tr>
+
+
+            <div class="container">
+                <div class="card-header">
+                    expires next:
+                </div>
+                <table class="table table-sm table-dark table-hover table-striped table-bordered">
+                    <thead>
+                        <tr>
+                            <th scope="col">Batch ID</th>
+                            <th scope="col">Name</th>
+                            <th scope="col">Total</th>
+                            <th scope="col">Expires</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            int b = 0;
+
+                            foreach (InventoryOnHandModel inv in Model.ExpiresNextModels)
+                            {
+                                <tr>
+                                    <td id="idOfBatch_Exp_@b">@inv.BatchId</td>
+                                    <td id="nameOf_Exp_@b">@inv.NameOf</td>
+                                    <td id="totalOf_Exp_@b">@inv.Total</td>
+                                    <td id="expOf_Exp_@b">@inv.Expiration</td>
+                                </tr>
 
                                 }
                             }
-                        </tbody>
-                    </table>
-                </div>
-
-
-
+                    </tbody>
+                </table>
             </div>
 
+
+
+        </div>*@
+
+
+            <!-- #endregion -->
 
 
 
@@ -247,137 +299,84 @@
     </div>
 
     <script type="text/javascript">
-         function moveFromBatchToInventory()  {
 
-             var idOfBatch = event.target.parentElement.children[1].innerHTML;
-
-                            $.ajax({
-                                type: 'POST',
-                                url: '/Home/MoveFromBatchToInventoryOnHand',
-                                dataType: 'json',
-                                data: "data=" + JSON.stringify({ id: idOfBatch, nameOf: "", total: 0 }),
-                                success: function () {
-                                    alert("moved from batches to inv")
-                                 
-                                    updateInfo();
-                                    
-                                    // Inventory select all.
-                                },
-                                error: function () { alert("FAIL ON MOVE TO INV") }
-
-                            });
+        function moveFromBatchToInventory() {
 
 
 
-    };
+            var batchId = document.getElementById('batchIdInsideRecord').innerHTML;
 
-         function createBatch()  {
+            $.ajax({
+                type: 'POST',
+                url: '/Home/MoveFromBatchToInventoryOnHand',
+                dataType: 'json',
+                data: "data=" + JSON.stringify({ id: batchId }),
+                success: function () {
+                    console.log("moved batch to inventory");
+                    updateInfo();
+                },
+                error: function () { console.log("FAIL ON MOVE BATCH"); }
 
-                            var nameOf = document.getElementById("nameOfDoughnutBatch").value;
-                            var total = document.getElementById("quantityOfBatch").value;
+            });
 
-
-
-                            @*stackoverflow.com/questions/25050240/ajax-post-parameter-is-always-null-in-mvc-app*@
-                            $.ajax({
-                                type: 'POST',
-                                url: '/Home/CreateBatchRecord',
-                                dataType: 'json',
-                                data: "data=" + JSON.stringify({ id: 0, nameOf: nameOf, total: total }),
-                                success: function () {
-                                    alert("created batch")
-                                    updateInfo();
-                                },
-                                error: function () { alert("FAIL ON CREATE BATCH") }
-
-                            });
+            };
 
 
+        
 
-                    };
-
-    
-
+      
         function updateInfo () {
 
-                    // Get all batches.
-                    $.ajax({
-                        url: '/Home/GetAllBatchesFromS_Proc',
-                        type: 'GET',
-                        dataType: 'json',
-                        success: function (data) {
-                            if (data.length > 0) {
-                                
-                                var parsedData = JSON.parse(data);
+            getAllBatches();
 
-                                if (parsedData.length > 50) {
+                //    // Update expires next.
+                //    $.ajax({
+                //        url: '/Home/GetExpiresNext',
+                //        type: 'GET',
+                //        dataType: 'json',
+                //        success: function (data) {
+                //            if (data.length > 0) {
+                //                console.log("getting expires next");
+                //                var parsedData = JSON.parse(data);
 
-                                    document.getElementById("isMaxedOut").innerHTML = "more than 100 batches in progress!";
+                //                for (let i = 0; i < data.length; i++) {
+                //                    document.getElementById("idOfBatch_Exp_" + i).innerHTML = parsedData[i].BatchId;
+                //                    document.getElementById("nameOf_Exp_" + i).innerHTML = parsedData[i].NameOf;
+                //                    document.getElementById("totalOf_Exp_" + i).innerHTML = parsedData[i].Total;
+                //                    document.getElementById("expOf_Exp_" + i).innerHTML = parsedData[i].Expiration;
+                //                }
 
-                                }
+                //                console.log("got expires next");
+                //            }
+                //            else {
+                //                console.log("FAILED");
+                //            }
+                //        }
+                //    });
 
-                                for (let i = 0; i < data.length; i++) {
-                                    document.getElementById("idOf_" + i).innerHTML = parsedData[i].ID;
-                                    document.getElementById("nameOf_" + i).innerHTML = parsedData[i].NameOf;
-                                    document.getElementById("batchTotal_" + i).innerHTML = parsedData[i].Total;
-                                    document.getElementById("started_" + i).innerHTML = parsedData[i].Started;
-                                }
-                                alert("got batches")
-                            }
-                            else {
-                                alert("FAILED");
-                            }
-                        }
-                    });
+                //    // Get totals by type.
+                //    $.ajax({
+                //        url: '/Home/GetInventoryOnHandAllByType',
+                //        type: 'GET',
+                //        dataType: 'json',
+                //        success: function (data) {
+                //            if (data.length > 0) {
+                //                console.log("gettig on hand by type");
+                //                var parsedData = JSON.parse(data);
 
-                    // Update expires next.
-                    $.ajax({
-                        url: '/Home/GetExpiresNext',
-                        type: 'GET',
-                        dataType: 'json',
-                        success: function (data) {
-                            if (data.length > 0) {
+                //                for (let i = 0; i < data.length; i++) {
+                //                    document.getElementById("nameOfType_" + i).innerHTML = parsedData[i].NameOf;
+                //                    document.getElementById("batchTotalType_" + i).innerHTML = parsedData[i].Total;
+                //                }
 
-                                var parsedData = JSON.parse(data);
-
-                                for (let i = 0; i < data.length; i++) {
-                                    document.getElementById("idOfBatch_Exp_" + i).innerHTML = parsedData[i].BatchId;
-                                    document.getElementById("nameOf_Exp_" + i).innerHTML = parsedData[i].NameOf;
-                                    document.getElementById("totalOf_Exp_" + i).innerHTML = parsedData[i].Total;
-                                    document.getElementById("expOf_Exp_" + i).innerHTML = parsedData[i].Expiration;
-                                }
-
-                                alert("got expires next")
-                            }
-                            else {
-                                alert("FAILED");
-                            }
-                        }
-                    });
-
-                    // Get totals by type.
-                    $.ajax({
-                        url: '/Home/GetInventoryOnHandAllByType',
-                        type: 'GET',
-                        dataType: 'json',
-                        success: function (data) {
-                            if (data.length > 0) {
-
-                                var parsedData = JSON.parse(data);
-
-                                for (let i = 0; i < data.length; i++) {
-                                    document.getElementById("nameOfType_" + i).innerHTML = parsedData[i].NameOf;
-                                    document.getElementById("batchTotalType_" + i).innerHTML = parsedData[i].Total;
-                                }
-
-                                alert("got totals by type")
-                            }
-                            else {
-                                alert("FAILED");
-                            }
-                        }
-                    });
-                };
+                //                console.log("got totals by type");
+                //            }
+                //            else {
+                //                console.log("FAILED");
+                //            }
+                //        }
+                //    });
+                //};
     </script>
 </body>
 </html>

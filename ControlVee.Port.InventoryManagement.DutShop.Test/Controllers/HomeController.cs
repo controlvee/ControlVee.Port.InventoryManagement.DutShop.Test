@@ -27,38 +27,57 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test.Controllers
         private List<BatchModel> batches;
         private List<InventoryOnHandModel> expiresNext;
         private List<InventoryOnHandModelByType> invTotalsByType;
+        private List<InventoryOnHandModel> invOnHand;
         private readonly string cstring = @"Data Source=(localdb)\mssqllocaldb;Database=DutShop;Integrated Security=True";
         private DataAccess context;
+        public MasterModel masterModel = new MasterModel();
+        public MasterModel MasterModel
+
+        {
+            get
+            {
+                return masterModel;
+            }
+            set
+            {
+                masterModel = value;
+            }
+        }
 
         public HomeController()
         {
-            using (var connection = new System.Data.SqlClient.SqlConnection())
-            {
-                connection.ConnectionString = cstring;
 
-                context = new DataAccess(connection);
-            }
         }
 
         public IActionResult Index()
         {
+
+
             using (var connection = new System.Data.SqlClient.SqlConnection())
             {
                 connection.ConnectionString = cstring;
 
                 context = new DataAccess(connection);
-                
+
                 batches = context.GetAllBatchesFromDb();
                 expiresNext = context.GetExpiresNextByBatchFromDb();
+                invOnHand = context.GetOnHandInventoryAllFromDb();
                 invTotalsByType = context.GetInventoryTotalsByTypeFromDb();
+
+
+                masterModel.BatchModels = batches;
+                masterModel.ExpiresNextModels = expiresNext;
+                masterModel.InventoryOnHandModels = invOnHand;
+                masterModel.InventoryOnHandByTypeModel = invTotalsByType;
+
+
             };
+            //// TODO: Sort here or below methods?  BOTH?
+            //ViewBag.NewestBatches = batches.OrderBy(b => b.Started);
+            //ViewBag.ExpiresNext = expiresNext.OrderBy(b => b.Expiration);
+            //ViewBag.InvTotalsByType = invTotalsByType.OrderBy(b => b.NameOf);
 
-            // TODO: Sort here or below methods?  BOTH?
-            ViewBag.NewestBatches = batches.OrderBy(b => b.Started);
-            ViewBag.ExpiresNext = expiresNext.OrderBy(b => b.Expiration);
-            ViewBag.InvTotalsByType = invTotalsByType.OrderBy(b => b.NameOf);
-
-            return View();
+            return View(masterModel);
         }
 
       
@@ -74,7 +93,16 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test.Controllers
                 connection.ConnectionString = cstring;
 
                 context = new DataAccess(connection);
-                context.CreateBatchRecordFromDb(createBatchModel.nameOf, createBatchModel.total); 
+                
+
+                if (!context.CreateBatchRecordFromDb(createBatchModel.nameOf, createBatchModel.total))
+                {
+                    // Return to ajax call.
+                    throw new System.Exception("Move from batch to inventory failed.");
+                }
+
+              
+
             };
 
             return Json(JsonConvert.SerializeObject("{ message: \"OK200\" }"));
@@ -96,7 +124,10 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test.Controllers
                     // Return to ajax call.
                     throw new System.Exception("Move from batch to inventory failed.");
                 }
+
+               
             };
+
 
             return Json(JsonConvert.SerializeObject("{ message: \"OK200\" }"));
         }
@@ -104,21 +135,22 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test.Controllers
 
         public IActionResult GetInventoryOnHandAll()
         {
-            List<InventoryOnHandModel> inv = new List<InventoryOnHandModel>();
+            invOnHand = new List<InventoryOnHandModel>();
             using (var connection = new System.Data.SqlClient.SqlConnection())
             {
                 connection.ConnectionString = cstring;
 
                 context = new DataAccess(connection);
 
-                inv = context.GetOnHandInventoryAllFromDb();
-                ViewBag.Inventory = inv;
+                invOnHand = context.GetOnHandInventoryAllFromDb();
+
+                masterModel.InventoryOnHandModels = invOnHand;
             };
             return View("Index");
         }
 
         [HttpGet]
-        public IActionResult GetAllBatchesFromS_Proc()
+        public IActionResult GetAllBatches()
         {
             batches = new List<BatchModel>();
             using (var connection = new System.Data.SqlClient.SqlConnection())
@@ -129,11 +161,12 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test.Controllers
              
                 batches = context.GetAllBatchesFromDb();
 
+                masterModel.BatchModels = batches;
             };
 
-            string json = JsonConvert.SerializeObject(batches);
+            JsonSerializerSettings jset = new JsonSerializerSettings();
 
-            return Json(json);
+              return Json(JsonConvert.SerializeObject(batches));
         }
 
         [HttpGet]
@@ -147,29 +180,30 @@ namespace ControlVee.Port.InventoryManagement.DutShop.Test.Controllers
                 context = new DataAccess(connection);
 
                 expiresNext = context.GetExpiresNextByBatchFromDb();
+
+                masterModel.ExpiresNextModels = expiresNext;
             };
 
-            string json = JsonConvert.SerializeObject(expiresNext.OrderBy(b => b.Expiration));
-
-            return Json(json);
+             return Json(JsonConvert.SerializeObject(expiresNext));
         }
 
         [HttpGet]
         public IActionResult GetInventoryOnHandAllByType()
         {
-            List<InventoryOnHandModelByType> inv = new List<InventoryOnHandModelByType>();
+            invTotalsByType = new List<InventoryOnHandModelByType>();
             using (var connection = new System.Data.SqlClient.SqlConnection())
             {
                 connection.ConnectionString = cstring;
 
                 context = new DataAccess(connection);
 
-                inv = context.GetInventoryTotalsByTypeFromDb();
-                ViewBag.Inventory = inv;
-            };
-            string json = JsonConvert.SerializeObject(inv);
+                invTotalsByType = context.GetInventoryTotalsByTypeFromDb();
 
-            return Json(json);
+                masterModel.InventoryOnHandByTypeModel = invTotalsByType;
+               
+            };
+
+             return Json(JsonConvert.SerializeObject(invTotalsByType));
         }
 
         public IActionResult UpdateBatches()
